@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ---------- CSS Variables (Design Tokens) ---------- */
+        /* (Keep all your existing premium styles – they remain unchanged) */
         :root {
             --bg-primary: #0a0c10;
             --bg-secondary: #11161f;
@@ -583,17 +583,22 @@
                 });
             }
 
-            // ---------- Deriv OAuth (Fixed according to official docs) ----------
-            const DERIV_APP_ID = '32F9XTfJ5NuRcYUeGCjIs'; // Your App ID from Deriv dashboard
+            // ---------- Deriv OAuth (Fixed per official docs) ----------
+            const DERIV_CLIENT_ID = '32F9XTfJ5NuRcYUeGCjIs'; // Your client_id from Deriv dashboard
             const REDIRECT_URI = encodeURIComponent('https://quantara-trading-bots-platform.vercel.app/callback.html');
+            const SCOPES = encodeURIComponent('read,trade'); // Scopes you registered
 
             const connectBtn = document.getElementById('derivConnectBtn');
             const connectText = document.getElementById('connectText');
 
+            function generateState() {
+                return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            }
+
             function updateConnectionStatus() {
-                // Check if we have stored accounts (indicating successful auth)
-                const accounts = sessionStorage.getItem('deriv_accounts');
-                if (accounts) {
+                // Check if we have a stored code (temporary – real token exchange would happen on backend)
+                const hasCode = sessionStorage.getItem('deriv_auth_code');
+                if (hasCode) {
                     connectBtn.classList.add('connected');
                     connectText.textContent = 'Connected';
                 } else {
@@ -605,20 +610,23 @@
             connectBtn.addEventListener('click', () => {
                 if (connectBtn.classList.contains('connected')) {
                     // Disconnect: clear stored data
-                    sessionStorage.removeItem('deriv_accounts');
-                    sessionStorage.removeItem('deriv_token');
+                    sessionStorage.removeItem('deriv_auth_code');
                     updateConnectionStatus();
                 } else {
-                    // Build OAuth URL exactly as per Deriv documentation:
-                    // https://developers.deriv.com/docs/authentication#oauth-flow
-                    const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${DERIV_APP_ID}&redirect_uri=${REDIRECT_URI}`;
+                    // Generate a random state for CSRF protection
+                    const state = generateState();
+                    sessionStorage.setItem('oauth_state', state);
+
+                    // Build correct OAuth URL as per official docs:
+                    // https://auth.deriv.com/oauth2/auth?client_id=...&redirect_uri=...&response_type=code&scope=...&state=...
+                    const oauthUrl = `https://auth.deriv.com/oauth2/auth?client_id=${DERIV_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=${SCOPES}&state=${state}`;
                     window.location.href = oauthUrl;
                 }
             });
 
-            // Check if we returned from OAuth with account tokens (handled by callback.html)
-            // The callback will store accounts and redirect back to '/'
-            // So on page load, we just update connection status.
+            // Check if we returned from OAuth with code (handled by callback.html)
+            // The callback will store code and redirect back to '/'
+            // On page load, we update status.
 
             // Demo/Real toggle
             const demoButtons = document.querySelectorAll('#demoToggle button');
