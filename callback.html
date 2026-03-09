@@ -1,685 +1,90 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantara – AI Trading Bots for Deriv</title>
-    <!-- Fonts & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Connecting to Quantara...</title>
     <style>
-        /* ---------- CSS Variables (Design Tokens) ---------- */
-        :root {
-            --bg-primary: #0a0c10;
-            --bg-secondary: #11161f;
-            --bg-glass: rgba(20, 30, 45, 0.6);
-            --border-glass: rgba(255, 255, 255, 0.05);
-            --text-primary: #ffffff;
-            --text-secondary: #b0c4de;
-            --text-muted: #6c7a8a;
-            --accent-primary: #3b82f6;
-            --accent-gradient: linear-gradient(135deg, #3b82f6, #a855f7, #ec4899);
-            --card-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
-            --glow-color: rgba(59, 130, 246, 0.4);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-            overflow-x: hidden;
-        }
-
-        /* ---------- Glassmorphism Utility ---------- */
-        .glass {
-            background: var(--bg-glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--border-glass);
-            border-radius: 24px;
-        }
-
-        .glass-card {
-            background: rgba(20, 30, 45, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid var(--border-glass);
-            border-radius: 24px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-        }
-
-        .glass-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 25px 50px -12px var(--glow-color);
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-
-        /* ---------- Gradient Text ---------- */
-        .gradient-text {
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            background-size: 200% 200%;
-            animation: gradient-shift 6s ease infinite;
-        }
-
-        @keyframes gradient-shift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* ---------- Buttons ---------- */
-        .btn-primary {
-            background: var(--accent-gradient);
-            border: none;
+            background-color: #0a0c10;
             color: white;
-            padding: 12px 32px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background-size: 200% 200%;
-            box-shadow: 0 10px 20px -8px var(--glow-color);
-        }
-
-        .btn-primary:hover {
-            transform: scale(1.02);
-            box-shadow: 0 15px 30px -8px #3b82f6;
-            background-position: 100% 100%;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-primary);
-            padding: 12px 32px;
-            border-radius: 40px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s ease, border-color 0.2s ease;
-        }
-
-        .btn-outline:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-connect {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            color: #3b82f6;
-            padding: 8px 20px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 0.9rem;
             display: flex;
             align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-connect:hover {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: #3b82f6;
-        }
-
-        .btn-connect.connected {
-            background: rgba(16, 185, 129, 0.1);
-            border-color: #10b981;
-            color: #10b981;
-        }
-
-        /* ---------- Layout ---------- */
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        /* ---------- Header ---------- */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .logo {
-            font-size: 2rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        .logo span {
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-secondary);
-            font-weight: 500;
-            transition: color 0.2s ease;
-        }
-
-        .nav-links a:hover {
-            color: white;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 16px;
-            align-items: center;
-        }
-
-        .demo-toggle {
-            display: flex;
-            align-items: center;
-            background: rgba(255,255,255,0.03);
-            border-radius: 40px;
-            padding: 4px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .demo-toggle button {
-            background: transparent;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 32px;
-            font-weight: 500;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: var(--text-secondary);
-        }
-
-        .demo-toggle button.active {
-            background: var(--accent-gradient);
-            color: white;
-        }
-
-        /* ---------- Hero ---------- */
-        .hero {
-            padding: 80px 0 60px;
-            text-align: center;
-            position: relative;
-        }
-
-        .hero h1 {
-            font-size: 4.5rem;
-            font-weight: 700;
-            line-height: 1.1;
-            max-width: 1000px;
-            margin: 0 auto 24px;
-        }
-
-        .hero p {
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto 40px;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 16px;
             justify-content: center;
-            flex-wrap: wrap;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
         }
-
-        .floating-element {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle at 30% 50%, rgba(59,130,246,0.15), transparent 70%);
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid #3b82f6;
             border-radius: 50%;
-            filter: blur(60px);
-            z-index: -1;
-            animation: float 12s infinite alternate ease-in-out;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
         }
-
-        .floating-1 { top: -100px; left: -100px; }
-        .floating-2 { bottom: -100px; right: -100px; background: radial-gradient(circle at 70% 30%, rgba(168,85,247,0.15), transparent 70%); }
-
-        @keyframes float {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(30px, 20px) scale(1.1); }
-        }
-
-        /* ---------- Section Titles ---------- */
-        .section-title {
-            font-size: 2rem;
-            font-weight: 600;
-            margin: 60px 0 32px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .section-title-badge {
-            background: var(--accent-gradient);
-            padding: 4px 12px;
-            border-radius: 40px;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        /* ---------- Bot Grid ---------- */
-        .bot-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
-        }
-
-        .bot-card {
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            text-decoration: none;
-            color: inherit;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .bot-card::after {
-            content: '';
-            position: absolute;
-            inset: 0;
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .glass-card {
+            background: rgba(20,30,45,0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.05);
             border-radius: 24px;
-            padding: 2px;
-            background: var(--accent-gradient);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .bot-card:hover::after {
-            opacity: 0.5;
-        }
-
-        .bot-icon {
-            width: 56px;
-            height: 56px;
-            background: rgba(59,130,246,0.1);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            font-size: 2rem;
-        }
-
-        .bot-name {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .bot-desc {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-bottom: 20px;
-            flex: 1;
-        }
-
-        .bot-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: auto;
-        }
-
-        .bot-price {
-            font-weight: 700;
-            font-size: 1.3rem;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .bot-lease {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .bot-tag {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255,255,255,0.05);
-            padding: 4px 12px;
-            border-radius: 40px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .bot-tag.free { background: rgba(16,185,129,0.2); color: #10b981; }
-        .bot-tag.freemium { background: rgba(245,158,11,0.2); color: #f59e0b; }
-        .bot-tag.premium { background: rgba(139,92,246,0.2); color: #8b5cf6; }
-
-        /* ---------- Features ---------- */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 32px;
-            margin: 80px 0;
-        }
-
-        .feature-item {
-            text-align: center;
-            padding: 32px;
-            background: rgba(255,255,255,0.02);
-            border-radius: 32px;
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 16px;
-            color: #3b82f6;
-        }
-
-        .feature-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .feature-desc {
-            color: var(--text-secondary);
-        }
-
-        /* ---------- Footer ---------- */
-        footer {
-            border-top: 1px solid rgba(255,255,255,0.05);
-            padding: 40px 0;
-            margin-top: 80px;
-            text-align: center;
-            color: var(--text-muted);
-        }
-
-        footer a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        footer a:hover {
-            color: white;
-        }
-
-        /* ---------- Responsive ---------- */
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 2.8rem; }
-            .features-grid { grid-template-columns: 1fr; }
-            .nav-links { display: none; }
-            header { flex-direction: column; align-items: stretch; }
-            .header-actions { justify-content: space-between; }
-        }
-
-        /* ---------- Animations ---------- */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .animate-in {
-            animation: fadeInUp 0.6s ease forwards;
+            padding: 40px;
+            max-width: 400px;
         }
     </style>
 </head>
 <body>
-    <div class="floating-element floating-1"></div>
-    <div class="floating-element floating-2"></div>
-
-    <div class="container">
-        <!-- Header -->
-        <header>
-            <div class="logo">Quantara<span>.</span></div>
-            <div class="nav-links">
-                <a href="#">Bots</a>
-                <a href="#">Pricing</a>
-                <a href="#">Deposit</a>
-                <a href="#">Withdraw</a>
-                <a href="#">Docs</a>
-            </div>
-            <div class="header-actions">
-                <div class="demo-toggle" id="demoToggle">
-                    <button class="active" data-mode="demo">Demo</button>
-                    <button data-mode="real">Real</button>
-                </div>
-                <button class="btn-connect" id="derivConnectBtn">
-                    <i class="fas fa-plug"></i>
-                    <span id="connectText">Connect Deriv</span>
-                </button>
-            </div>
-        </header>
-
-        <!-- Hero -->
-        <section class="hero">
-            <h1 class="gradient-text animate-in">Trade the markets<br>with AI precision.</h1>
-            <p class="animate-in" style="animation-delay: 0.1s;">Lease our 20+ premium trading bots for Deriv. Each bot uses advanced AI to analyze and execute trades automatically. No coding, no stress.</p>
-            <div class="hero-buttons animate-in" style="animation-delay: 0.2s;">
-                <button class="btn-primary" onclick="document.getElementById('bots').scrollIntoView({behavior:'smooth'})">Explore bots</button>
-                <button class="btn-outline">How it works</button>
-            </div>
-        </section>
-
-        <!-- Bot Grid Sections -->
-        <div id="bots">
-            <!-- Free Bots -->
-            <div class="section-title">
-                <span>Free bots</span>
-                <span class="section-title-badge">Start for free</span>
-            </div>
-            <div class="bot-grid" id="freeBotsGrid"></div>
-
-            <!-- Freemium Bots -->
-            <div class="section-title" style="margin-top: 60px;">
-                <span>Freemium</span>
-                <span class="section-title-badge">Try before you lease</span>
-            </div>
-            <div class="bot-grid" id="freemiumBotsGrid"></div>
-
-            <!-- Premium Bots -->
-            <div class="section-title" style="margin-top: 60px;">
-                <span>Premium</span>
-                <span class="section-title-badge">Full AI power</span>
-            </div>
-            <div class="bot-grid" id="premiumBotsGrid"></div>
-        </div>
-
-        <!-- Features -->
-        <div class="features-grid">
-            <div class="feature-item glass-card">
-                <div class="feature-icon">🤖</div>
-                <div class="feature-title">20+ AI Strategies</div>
-                <div class="feature-desc">From scalping to trend following – powered by multiple AIs.</div>
-            </div>
-            <div class="feature-item glass-card">
-                <div class="feature-icon">⚡</div>
-                <div class="feature-title">Lease for 2 weeks</div>
-                <div class="feature-desc">Pay as low as KES 500. No long-term commitment.</div>
-            </div>
-            <div class="feature-item glass-card">
-                <div class="feature-icon">🔒</div>
-                <div class="feature-title">Secure OAuth</div>
-                <div class="feature-desc">Connect your Deriv account safely – we never see your password.</div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <footer>
-            <p>© 2026 Quantara. All rights reserved. | <a href="#">Terms</a> | <a href="#">Privacy</a> | <a href="#">Contact</a></p>
-        </footer>
+    <div class="glass-card">
+        <h2>Connecting your Deriv account</h2>
+        <div class="loader"></div>
+        <p id="status">Processing authorization...</p>
     </div>
 
     <script>
         (function() {
-            // ---------- Bot Data ----------
-            const bots = [
-                // Free
-                { id: 'basic-sma', name: 'Basic SMA', desc: 'Simple moving average crossover for educational use.', price: 'Free', tier: 'free', icon: '📊' },
-                { id: 'rsi-demo', name: 'RSI Demo', desc: 'Learn relative strength index signals.', price: 'Free', tier: 'free', icon: '📉' },
-                // Freemium
-                { id: 'scalper-lite', name: 'Scalper Lite', desc: 'Limited trades per day, upgrade for full access.', price: 'KES 0', tier: 'freemium', icon: '⚡' },
-                { id: 'trend-rider-lite', name: 'Trend Rider Lite', desc: 'Basic trend following with daily limits.', price: 'KES 0', tier: 'freemium', icon: '📈' },
-                // Premium (the rest)
-                { id: 'triple-ai', name: 'Triple AI Consensus', desc: 'Grok + Grok + Harvey – majority vote with confidence scoring.', price: 'KES 1,500', tier: 'premium', icon: '🧠' },
-                { id: 'scalper-pro', name: 'Scalper Pro', desc: 'Quick entries/exits on volatility indices. 1-minute trades.', price: 'KES 800', tier: 'premium', icon: '⚡' },
-                { id: 'trend-rider', name: 'Trend Rider', desc: 'Catches medium-term moves with adaptive trailing stop.', price: 'KES 1,200', tier: 'premium', icon: '📈' },
-                { id: 'mean-reversion', name: 'Mean Reversion', desc: 'Bet on price corrections – works best in ranging markets.', price: 'KES 900', tier: 'premium', icon: '↩️' },
-                { id: 'ai-breakout', name: 'AI Breakout', desc: 'Detects breakouts with volume confirmation.', price: 'KES 1,100', tier: 'premium', icon: '💥' },
-                { id: 'harvey-specter', name: 'Harvey Specter', desc: 'Aggressive AI modeled after Harvey\'s negotiation tactics.', price: 'KES 2,000', tier: 'premium', icon: '👔' },
-                { id: 'momentum-pro', name: 'Momentum Pro', desc: '3-phase momentum with recovery system.', price: 'KES 1,800', tier: 'premium', icon: '🚀' },
-                { id: 'grid-ai', name: 'Grid AI', desc: 'Places grid orders automatically, adjusts to volatility.', price: 'KES 1,400', tier: 'premium', icon: '🔲' },
-                { id: 'martingale-x', name: 'Martingale X', desc: 'Intelligent martingale with loss recovery.', price: 'KES 2,200', tier: 'premium', icon: '🔄' },
-                { id: 'hedge-master', name: 'Hedge Master', desc: 'Automated hedging for risk reduction.', price: 'KES 1,900', tier: 'premium', icon: '🛡️' },
-                { id: 'news-trader', name: 'News Trader', desc: 'Scans economic news and trades volatility spikes.', price: 'KES 2,500', tier: 'premium', icon: '📰' },
-                { id: 'btc-ai', name: 'BTC AI', desc: 'Specialized in Bitcoin volatility indices.', price: 'KES 2,100', tier: 'premium', icon: '₿' },
-                { id: 'forex-ai', name: 'Forex AI', desc: 'AI optimized for major forex pairs on Deriv.', price: 'KES 1,700', tier: 'premium', icon: '💱' },
-                { id: 'step-index', name: 'Step Index Hunter', desc: 'Trades step index patterns with high precision.', price: 'KES 2,300', tier: 'premium', icon: '🪜' },
-                { id: 'crash-boom', name: 'Crash/Boom Protector', desc: 'Avoids trading during crash/boom events.', price: 'KES 1,600', tier: 'premium', icon: '⚠️' },
-                { id: 'multi-asset', name: 'Multi-Asset Suite', desc: 'Runs multiple strategies across 5 assets simultaneously.', price: 'KES 3,000', tier: 'premium', icon: '🧩' },
-            ];
-
-            // Render bots by tier
-            function renderBots() {
-                const freeGrid = document.getElementById('freeBotsGrid');
-                const freemiumGrid = document.getElementById('freemiumBotsGrid');
-                const premiumGrid = document.getElementById('premiumBotsGrid');
-
-                bots.forEach(bot => {
-                    const card = document.createElement('a');
-                    card.href = `bot.html?id=${bot.id}`;
-                    card.className = 'bot-card glass-card';
-
-                    const tierClass = bot.tier === 'free' ? 'free' : bot.tier === 'freemium' ? 'freemium' : 'premium';
-                    const tierLabel = bot.tier === 'free' ? 'Free' : bot.tier === 'freemium' ? 'Freemium' : 'Premium';
-
-                    card.innerHTML = `
-                        <div class="bot-icon">${bot.icon}</div>
-                        <div class="bot-name">${bot.name}</div>
-                        <div class="bot-desc">${bot.desc}</div>
-                        <div class="bot-footer">
-                            <span class="bot-price">${bot.price}</span>
-                            <span class="bot-lease">2 weeks</span>
-                        </div>
-                        <div class="bot-tag ${tierClass}">${tierLabel}</div>
-                    `;
-
-                    if (bot.tier === 'free') freeGrid.appendChild(card);
-                    else if (bot.tier === 'freemium') freemiumGrid.appendChild(card);
-                    else premiumGrid.appendChild(card);
-                });
-            }
-
-            // ---------- Deriv OAuth ----------
-            const DERIV_APP_ID = 'YOUR_APP_ID'; // Replace with your actual Deriv app ID
-            const REDIRECT_URI = window.location.origin + '/callback.html'; // You'll need a callback page
-
-            const connectBtn = document.getElementById('derivConnectBtn');
-            const connectText = document.getElementById('connectText');
-
-            // Check if already connected (simulated via localStorage)
-            function updateConnectionStatus() {
-                const derivToken = localStorage.getItem('deriv_token');
-                if (derivToken) {
-                    connectBtn.classList.add('connected');
-                    connectText.textContent = 'Connected';
-                } else {
-                    connectBtn.classList.remove('connected');
-                    connectText.textContent = 'Connect Deriv';
-                }
-            }
-
-            connectBtn.addEventListener('click', () => {
-                if (connectBtn.classList.contains('connected')) {
-                    // Disconnect (clear local storage)
-                    localStorage.removeItem('deriv_token');
-                    localStorage.removeItem('deriv_accounts');
-                    updateConnectionStatus();
-                } else {
-                    // Redirect to Deriv OAuth
-                    const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${DERIV_APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
-                    window.location.href = oauthUrl;
-                }
-            });
-
-            // Parse OAuth response if on callback page (you'll implement callback.html separately)
-            // For this index page, we just show connection status.
-
-            // Demo/Real toggle
-            const demoButtons = document.querySelectorAll('#demoToggle button');
-            demoButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    demoButtons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    const mode = btn.dataset.mode;
-                    console.log('Trading mode set to:', mode);
-                    // You can store mode in localStorage or broadcast event
-                    localStorage.setItem('trading_mode', mode);
-                });
-            });
-
-            // Initialize
-            renderBots();
-            updateConnectionStatus();
-
-            // Check URL for OAuth response (if someone lands here after redirect)
-            // In practice, you'd redirect to a dedicated callback page, but for simplicity we can handle here.
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('acct1')) {
-                // Extract tokens
+            const statusEl = document.getElementById('status');
+            
+            // Get parameters from URL
+            const params = new URLSearchParams(window.location.search);
+            
+            // Check if we received tokens (Deriv returns acct1, token1, etc.)
+            if (params.has('acct1')) {
+                // Extract all accounts
                 const accounts = [];
                 let i = 1;
-                while (urlParams.has(`acct${i}`)) {
+                while (params.has(`acct${i}`)) {
                     accounts.push({
-                        account: urlParams.get(`acct${i}`),
-                        token: urlParams.get(`token${i}`),
-                        currency: urlParams.get(`cur${i}`)
+                        account: params.get(`acct${i}`),
+                        token: params.get(`token${i}`),
+                        currency: params.get(`cur${i}`)
                     });
                     i++;
                 }
+                
+                // Store the first token as primary
                 if (accounts.length > 0) {
-                    localStorage.setItem('deriv_token', accounts[0].token); // store first token as primary
+                    localStorage.setItem('deriv_token', accounts[0].token);
                     localStorage.setItem('deriv_accounts', JSON.stringify(accounts));
-                    updateConnectionStatus();
-                    // Clean URL
-                    window.history.replaceState({}, document.title, window.location.pathname);
+                    
+                    statusEl.innerText = '✅ Connected successfully! Redirecting...';
+                    
+                    // Redirect back to home page
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1500);
+                } else {
+                    statusEl.innerText = '❌ No account data received';
                 }
+            } 
+            // Check for error
+            else if (params.has('error')) {
+                statusEl.innerText = `❌ Authorization failed: ${params.get('error_description') || params.get('error')}`;
+            }
+            else {
+                statusEl.innerText = '❌ No authorization data received';
             }
         })();
     </script>
