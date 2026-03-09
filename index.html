@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -607,8 +606,8 @@
             }
 
             // ---------- Deriv OAuth ----------
-            const DERIV_APP_ID = 'YOUR_APP_ID'; // Replace with your actual Deriv app ID
-            const REDIRECT_URI = window.location.origin + '/callback.html'; // You'll need a callback page
+            const DERIV_APP_ID = '32F9XTfJ5NuRcYUeGCjIs'; // Your Quantara app ID
+            const REDIRECT_URI = encodeURIComponent('https://quantara-trading-bots-platform.vercel.app/callback.html');
 
             const connectBtn = document.getElementById('derivConnectBtn');
             const connectText = document.getElementById('connectText');
@@ -633,36 +632,15 @@
                     updateConnectionStatus();
                 } else {
                     // Redirect to Deriv OAuth
-                    const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${DERIV_APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+                    const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${DERIV_APP_ID}&redirect_uri=${REDIRECT_URI}`;
                     window.location.href = oauthUrl;
                 }
             });
 
-            // Parse OAuth response if on callback page (you'll implement callback.html separately)
-            // For this index page, we just show connection status.
-
-            // Demo/Real toggle
-            const demoButtons = document.querySelectorAll('#demoToggle button');
-            demoButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    demoButtons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    const mode = btn.dataset.mode;
-                    console.log('Trading mode set to:', mode);
-                    // You can store mode in localStorage or broadcast event
-                    localStorage.setItem('trading_mode', mode);
-                });
-            });
-
-            // Initialize
-            renderBots();
-            updateConnectionStatus();
-
-            // Check URL for OAuth response (if someone lands here after redirect)
-            // In practice, you'd redirect to a dedicated callback page, but for simplicity we can handle here.
+            // Parse OAuth response if on this page (for simplicity, we have callback.html handle it)
+            // But we also keep the URL parameter handling as fallback (if someone lands here directly)
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('acct1')) {
-                // Extract tokens
                 const accounts = [];
                 let i = 1;
                 while (urlParams.has(`acct${i}`)) {
@@ -674,13 +652,28 @@
                     i++;
                 }
                 if (accounts.length > 0) {
-                    localStorage.setItem('deriv_token', accounts[0].token); // store first token as primary
+                    localStorage.setItem('deriv_token', accounts[0].token);
                     localStorage.setItem('deriv_accounts', JSON.stringify(accounts));
                     updateConnectionStatus();
-                    // Clean URL
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
             }
+
+            // Demo/Real toggle
+            const demoButtons = document.querySelectorAll('#demoToggle button');
+            demoButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    demoButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const mode = btn.dataset.mode;
+                    console.log('Trading mode set to:', mode);
+                    localStorage.setItem('trading_mode', mode);
+                });
+            });
+
+            // Initialize
+            renderBots();
+            updateConnectionStatus();
         })();
     </script>
 </body>
