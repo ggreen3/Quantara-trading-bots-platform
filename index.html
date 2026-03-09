@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quantara – AI Trading Bots for Deriv</title>
+    <!-- Favicon (robot emoji style) -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='40' r='30' fill='%233b82f6'/%3E%3Ccircle cx='35' cy='35' r='5' fill='white'/%3E%3Ccircle cx='65' cy='35' r='5' fill='white'/%3E%3Crect x='40' y='55' width='20' height='10' fill='%233b82f6'/%3E%3C/svg%3E">
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ---------- CSS Variables (Design Tokens) ---------- */
+        /* (same as before – keep your existing premium styles) */
         :root {
             --bg-primary: #0a0c10;
             --bg-secondary: #11161f;
@@ -40,7 +42,6 @@
             overflow-x: hidden;
         }
 
-        /* ---------- Glassmorphism Utility ---------- */
         .glass {
             background: var(--bg-glass);
             backdrop-filter: blur(12px);
@@ -64,7 +65,6 @@
             border-color: rgba(59, 130, 246, 0.3);
         }
 
-        /* ---------- Gradient Text ---------- */
         .gradient-text {
             background: var(--accent-gradient);
             -webkit-background-clip: text;
@@ -80,7 +80,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* ---------- Buttons ---------- */
         .btn-primary {
             background: var(--accent-gradient);
             border: none;
@@ -143,14 +142,12 @@
             color: #10b981;
         }
 
-        /* ---------- Layout ---------- */
         .container {
             max-width: 1280px;
             margin: 0 auto;
             padding: 0 24px;
         }
 
-        /* ---------- Header ---------- */
         header {
             display: flex;
             justify-content: space-between;
@@ -223,7 +220,6 @@
             color: white;
         }
 
-        /* ---------- Hero ---------- */
         .hero {
             padding: 80px 0 60px;
             text-align: center;
@@ -271,7 +267,6 @@
             100% { transform: translate(30px, 20px) scale(1.1); }
         }
 
-        /* ---------- Section Titles ---------- */
         .section-title {
             font-size: 2rem;
             font-weight: 600;
@@ -289,7 +284,6 @@
             font-weight: 500;
         }
 
-        /* ---------- Bot Grid ---------- */
         .bot-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -389,7 +383,6 @@
         .bot-tag.freemium { background: rgba(245,158,11,0.2); color: #f59e0b; }
         .bot-tag.premium { background: rgba(139,92,246,0.2); color: #8b5cf6; }
 
-        /* ---------- Features ---------- */
         .features-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -420,7 +413,6 @@
             color: var(--text-secondary);
         }
 
-        /* ---------- Footer ---------- */
         footer {
             border-top: 1px solid rgba(255,255,255,0.05);
             padding: 40px 0;
@@ -439,7 +431,6 @@
             color: white;
         }
 
-        /* ---------- Responsive ---------- */
         @media (max-width: 768px) {
             .hero h1 { font-size: 2.8rem; }
             .features-grid { grid-template-columns: 1fr; }
@@ -448,7 +439,6 @@
             .header-actions { justify-content: space-between; }
         }
 
-        /* ---------- Animations ---------- */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -464,7 +454,6 @@
     <div class="floating-element floating-2"></div>
 
     <div class="container">
-        <!-- Header -->
         <header>
             <div class="logo">Quantara<span>.</span></div>
             <div class="nav-links">
@@ -486,7 +475,6 @@
             </div>
         </header>
 
-        <!-- Hero -->
         <section class="hero">
             <h1 class="gradient-text animate-in">Trade the markets<br>with AI precision.</h1>
             <p class="animate-in" style="animation-delay: 0.1s;">Lease our 20+ premium trading bots for Deriv. Each bot uses advanced AI to analyze and execute trades automatically. No coding, no stress.</p>
@@ -496,23 +484,19 @@
             </div>
         </section>
 
-        <!-- Bot Grid Sections -->
         <div id="bots">
-            <!-- Free Bots -->
             <div class="section-title">
                 <span>Free bots</span>
                 <span class="section-title-badge">Start for free</span>
             </div>
             <div class="bot-grid" id="freeBotsGrid"></div>
 
-            <!-- Freemium Bots -->
             <div class="section-title" style="margin-top: 60px;">
                 <span>Freemium</span>
                 <span class="section-title-badge">Try before you lease</span>
             </div>
             <div class="bot-grid" id="freemiumBotsGrid"></div>
 
-            <!-- Premium Bots -->
             <div class="section-title" style="margin-top: 60px;">
                 <span>Premium</span>
                 <span class="section-title-badge">Full AI power</span>
@@ -520,7 +504,6 @@
             <div class="bot-grid" id="premiumBotsGrid"></div>
         </div>
 
-        <!-- Features -->
         <div class="features-grid">
             <div class="feature-item glass-card">
                 <div class="feature-icon">🤖</div>
@@ -539,7 +522,6 @@
             </div>
         </div>
 
-        <!-- Footer -->
         <footer>
             <p>© 2026 Quantara. All rights reserved. | <a href="#">Terms</a> | <a href="#">Privacy</a> | <a href="#">Contact</a></p>
         </footer>
@@ -547,15 +529,12 @@
 
     <script>
         (function() {
-            // ---------- Bot Data ----------
+            // Bot data (same as before)
             const bots = [
-                // Free
                 { id: 'basic-sma', name: 'Basic SMA', desc: 'Simple moving average crossover for educational use.', price: 'Free', tier: 'free', icon: '📊' },
                 { id: 'rsi-demo', name: 'RSI Demo', desc: 'Learn relative strength index signals.', price: 'Free', tier: 'free', icon: '📉' },
-                // Freemium
                 { id: 'scalper-lite', name: 'Scalper Lite', desc: 'Limited trades per day, upgrade for full access.', price: 'KES 0', tier: 'freemium', icon: '⚡' },
                 { id: 'trend-rider-lite', name: 'Trend Rider Lite', desc: 'Basic trend following with daily limits.', price: 'KES 0', tier: 'freemium', icon: '📈' },
-                // Premium (the rest)
                 { id: 'triple-ai', name: 'Triple AI Consensus', desc: 'Grok + Grok + Harvey – majority vote with confidence scoring.', price: 'KES 1,500', tier: 'premium', icon: '🧠' },
                 { id: 'scalper-pro', name: 'Scalper Pro', desc: 'Quick entries/exits on volatility indices. 1-minute trades.', price: 'KES 800', tier: 'premium', icon: '⚡' },
                 { id: 'trend-rider', name: 'Trend Rider', desc: 'Catches medium-term moves with adaptive trailing stop.', price: 'KES 1,200', tier: 'premium', icon: '📈' },
@@ -574,7 +553,6 @@
                 { id: 'multi-asset', name: 'Multi-Asset Suite', desc: 'Runs multiple strategies across 5 assets simultaneously.', price: 'KES 3,000', tier: 'premium', icon: '🧩' },
             ];
 
-            // Render bots by tier
             function renderBots() {
                 const freeGrid = document.getElementById('freeBotsGrid');
                 const freemiumGrid = document.getElementById('freemiumBotsGrid');
@@ -605,17 +583,18 @@
                 });
             }
 
-            // ---------- Deriv OAuth ----------
-            const DERIV_APP_ID = '32F9XTfJ5NuRcYUeGCjIs'; // Your Quantara app ID
+            // ---------- Deriv OAuth (Fixed) ----------
+            const DERIV_CLIENT_ID = '32F9XTfJ5NuRcYUeGCjIs'; // Your App ID (client_id)
             const REDIRECT_URI = encodeURIComponent('https://quantara-trading-bots-platform.vercel.app/callback.html');
 
             const connectBtn = document.getElementById('derivConnectBtn');
             const connectText = document.getElementById('connectText');
 
-            // Check if already connected (simulated via localStorage)
             function updateConnectionStatus() {
-                const derivToken = localStorage.getItem('deriv_token');
-                if (derivToken) {
+                // For now, we don't store tokens because we need backend exchange.
+                // We'll just show "Connected" if we have a code in sessionStorage (temporary)
+                const hasCode = sessionStorage.getItem('deriv_auth_code');
+                if (hasCode) {
                     connectBtn.classList.add('connected');
                     connectText.textContent = 'Connected';
                 } else {
@@ -626,37 +605,24 @@
 
             connectBtn.addEventListener('click', () => {
                 if (connectBtn.classList.contains('connected')) {
-                    // Disconnect (clear local storage)
-                    localStorage.removeItem('deriv_token');
-                    localStorage.removeItem('deriv_accounts');
+                    // Disconnect: clear any stored code
+                    sessionStorage.removeItem('deriv_auth_code');
                     updateConnectionStatus();
                 } else {
-                    // Redirect to Deriv OAuth
-                    const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${DERIV_APP_ID}&redirect_uri=${REDIRECT_URI}`;
+                    // Build correct OAuth URL with client_id, response_type=code, scope
+                    const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?client_id=${DERIV_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=read%20trade`;
                     window.location.href = oauthUrl;
                 }
             });
 
-            // Parse OAuth response if on this page (for simplicity, we have callback.html handle it)
-            // But we also keep the URL parameter handling as fallback (if someone lands here directly)
+            // Check if we returned from OAuth with a code (handled by callback.html, but we can also detect here)
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('acct1')) {
-                const accounts = [];
-                let i = 1;
-                while (urlParams.has(`acct${i}`)) {
-                    accounts.push({
-                        account: urlParams.get(`acct${i}`),
-                        token: urlParams.get(`token${i}`),
-                        currency: urlParams.get(`cur${i}`)
-                    });
-                    i++;
-                }
-                if (accounts.length > 0) {
-                    localStorage.setItem('deriv_token', accounts[0].token);
-                    localStorage.setItem('deriv_accounts', JSON.stringify(accounts));
-                    updateConnectionStatus();
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                }
+            if (urlParams.has('code')) {
+                const code = urlParams.get('code');
+                sessionStorage.setItem('deriv_auth_code', code);
+                updateConnectionStatus();
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
 
             // Demo/Real toggle
@@ -666,12 +632,10 @@
                     demoButtons.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     const mode = btn.dataset.mode;
-                    console.log('Trading mode set to:', mode);
                     localStorage.setItem('trading_mode', mode);
                 });
             });
 
-            // Initialize
             renderBots();
             updateConnectionStatus();
         })();
