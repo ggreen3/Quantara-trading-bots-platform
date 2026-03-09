@@ -65,13 +65,9 @@
             }
 
             if (code) {
-                // Success – store code temporarily
+                // Success – store code and redirect to home
                 sessionStorage.setItem('deriv_auth_code', code);
                 statusEl.innerHTML = '<span class="success">✅ Authorization successful! Redirecting...</span>';
-                
-                // In a real implementation, you would send this code to your backend
-                // to exchange for an access token using your client_secret.
-                // For now, we just redirect back to home.
                 setTimeout(() => {
                     window.location.href = '/';
                 }, 1500);
