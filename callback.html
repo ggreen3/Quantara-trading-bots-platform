@@ -44,68 +44,42 @@
         <h2>Connecting your Deriv account</h2>
         <div class="loader" id="loader"></div>
         <p id="status">Processing authorization...</p>
-        <div id="accountList" style="text-align: left; margin-top: 20px; display: none;"></div>
     </div>
 
     <script>
         (function() {
             const statusEl = document.getElementById('status');
             const loaderEl = document.getElementById('loader');
-            const accountListEl = document.getElementById('accountList');
             
-            // Get all parameters from URL
             const params = new URLSearchParams(window.location.search);
-            
-            // Check if we received account tokens (Deriv returns acct1, token1, cur1, etc.)
-            if (params.has('acct1')) {
-                // Parse all accounts
-                const accounts = [];
-                let i = 1;
-                
-                while (params.has(`acct${i}`)) {
-                    accounts.push({
-                        account: params.get(`acct${i}`),
-                        token: params.get(`token${i}`),
-                        currency: params.get(`cur${i}`)
-                    });
-                    i++;
-                }
-                
-                // Store accounts in sessionStorage
-                if (accounts.length > 0) {
-                    sessionStorage.setItem('deriv_accounts', JSON.stringify(accounts));
-                    // Store first token as primary for backward compatibility
-                    sessionStorage.setItem('deriv_token', accounts[0].token);
-                    
-                    statusEl.innerHTML = '<span class="success">✅ Connected successfully!</span>';
-                    loaderEl.style.display = 'none';
-                    
-                    // Display account list
-                    accountListEl.style.display = 'block';
-                    accountListEl.innerHTML = '<h3>Accounts connected:</h3>' + 
-                        accounts.map(acc => 
-                            `<div style="padding: 8px; margin: 5px 0; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                                <strong>${acc.account}</strong> (${acc.currency})<br>
-                                <small style="color: #9ca3af;">Token: ${acc.token.substring(0, 10)}...</small>
-                            </div>`
-                        ).join('');
-                    
-                    // Redirect back to home after 3 seconds
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 3000);
-                } else {
-                    statusEl.innerHTML = '<span class="error">❌ No account data received</span>';
-                    loaderEl.style.display = 'none';
-                }
-            } 
-            // Check for error
-            else if (params.has('error')) {
-                statusEl.innerHTML = `<span class="error">❌ Authorization failed: ${params.get('error_description') || params.get('error')}</span>`;
+            const code = params.get('code');
+            const state = params.get('state');
+            const error = params.get('error');
+
+            // Verify state matches the one we stored
+            const storedState = sessionStorage.getItem('oauth_state');
+            if (state && storedState && state !== storedState) {
+                statusEl.innerHTML = '<span class="error">❌ State mismatch – possible CSRF attack.</span>';
                 loaderEl.style.display = 'none';
+                return;
             }
-            else {
-                statusEl.innerHTML = '<span class="error">❌ No authorization data received. Expected account tokens.</span>';
+
+            if (code) {
+                // Success – store code temporarily
+                sessionStorage.setItem('deriv_auth_code', code);
+                statusEl.innerHTML = '<span class="success">✅ Authorization successful! Redirecting...</span>';
+                
+                // In a real implementation, you would send this code to your backend
+                // to exchange for an access token using your client_secret.
+                // For now, we just redirect back to home.
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+            } else if (error) {
+                statusEl.innerHTML = `<span class="error">❌ Authorization failed: ${error}</span>`;
+                loaderEl.style.display = 'none';
+            } else {
+                statusEl.innerHTML = '<span class="error">❌ No authorization code received.</span>';
                 loaderEl.style.display = 'none';
             }
         })();
