@@ -35,28 +35,78 @@
             padding: 40px;
             max-width: 400px;
         }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
     </style>
 </head>
 <body>
     <div class="glass-card">
         <h2>Connecting your Deriv account</h2>
-        <div class="loader"></div>
+        <div class="loader" id="loader"></div>
         <p id="status">Processing authorization...</p>
+        <div id="accountList" style="text-align: left; margin-top: 20px; display: none;"></div>
     </div>
 
     <script>
         (function() {
+            const statusEl = document.getElementById('status');
+            const loaderEl = document.getElementById('loader');
+            const accountListEl = document.getElementById('accountList');
+            
+            // Get all parameters from URL
             const params = new URLSearchParams(window.location.search);
-            const code = params.get('code');
-            const error = params.get('error');
-
-            if (code) {
-                // Success – redirect back to home with the code
-                window.location.href = '/?code=' + encodeURIComponent(code);
-            } else if (error) {
-                document.getElementById('status').innerText = '❌ Authorization failed: ' + error;
-            } else {
-                document.getElementById('status').innerText = '❌ No authorization code received.';
+            
+            // Check if we received account tokens (Deriv returns acct1, token1, cur1, etc.)
+            if (params.has('acct1')) {
+                // Parse all accounts
+                const accounts = [];
+                let i = 1;
+                
+                while (params.has(`acct${i}`)) {
+                    accounts.push({
+                        account: params.get(`acct${i}`),
+                        token: params.get(`token${i}`),
+                        currency: params.get(`cur${i}`)
+                    });
+                    i++;
+                }
+                
+                // Store accounts in sessionStorage
+                if (accounts.length > 0) {
+                    sessionStorage.setItem('deriv_accounts', JSON.stringify(accounts));
+                    // Store first token as primary for backward compatibility
+                    sessionStorage.setItem('deriv_token', accounts[0].token);
+                    
+                    statusEl.innerHTML = '<span class="success">✅ Connected successfully!</span>';
+                    loaderEl.style.display = 'none';
+                    
+                    // Display account list
+                    accountListEl.style.display = 'block';
+                    accountListEl.innerHTML = '<h3>Accounts connected:</h3>' + 
+                        accounts.map(acc => 
+                            `<div style="padding: 8px; margin: 5px 0; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                                <strong>${acc.account}</strong> (${acc.currency})<br>
+                                <small style="color: #9ca3af;">Token: ${acc.token.substring(0, 10)}...</small>
+                            </div>`
+                        ).join('');
+                    
+                    // Redirect back to home after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 3000);
+                } else {
+                    statusEl.innerHTML = '<span class="error">❌ No account data received</span>';
+                    loaderEl.style.display = 'none';
+                }
+            } 
+            // Check for error
+            else if (params.has('error')) {
+                statusEl.innerHTML = `<span class="error">❌ Authorization failed: ${params.get('error_description') || params.get('error')}</span>`;
+                loaderEl.style.display = 'none';
+            }
+            else {
+                statusEl.innerHTML = '<span class="error">❌ No authorization data received. Expected account tokens.</span>';
+                loaderEl.style.display = 'none';
             }
         })();
     </script>
