@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connecting to Quantara...</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='40' r='30' fill='%233b82f6'/%3E%3Ccircle cx='35' cy='35' r='5' fill='white'/%3E%3Ccircle cx='65' cy='35' r='5' fill='white'/%3E%3Crect x='40' y='55' width='20' height='10' fill='%233b82f6'/%3E%3C/svg%3E">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -45,46 +46,17 @@
 
     <script>
         (function() {
-            const statusEl = document.getElementById('status');
-            
-            // Get parameters from URL
             const params = new URLSearchParams(window.location.search);
-            
-            // Check if we received tokens (Deriv returns acct1, token1, etc.)
-            if (params.has('acct1')) {
-                // Extract all accounts
-                const accounts = [];
-                let i = 1;
-                while (params.has(`acct${i}`)) {
-                    accounts.push({
-                        account: params.get(`acct${i}`),
-                        token: params.get(`token${i}`),
-                        currency: params.get(`cur${i}`)
-                    });
-                    i++;
-                }
-                
-                // Store the first token as primary
-                if (accounts.length > 0) {
-                    localStorage.setItem('deriv_token', accounts[0].token);
-                    localStorage.setItem('deriv_accounts', JSON.stringify(accounts));
-                    
-                    statusEl.innerText = '✅ Connected successfully! Redirecting...';
-                    
-                    // Redirect back to home page
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 1500);
-                } else {
-                    statusEl.innerText = '❌ No account data received';
-                }
-            } 
-            // Check for error
-            else if (params.has('error')) {
-                statusEl.innerText = `❌ Authorization failed: ${params.get('error_description') || params.get('error')}`;
-            }
-            else {
-                statusEl.innerText = '❌ No authorization data received';
+            const code = params.get('code');
+            const error = params.get('error');
+
+            if (code) {
+                // Success – redirect back to home with the code
+                window.location.href = '/?code=' + encodeURIComponent(code);
+            } else if (error) {
+                document.getElementById('status').innerText = '❌ Authorization failed: ' + error;
+            } else {
+                document.getElementById('status').innerText = '❌ No authorization code received.';
             }
         })();
     </script>
