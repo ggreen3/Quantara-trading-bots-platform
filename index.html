@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* (keep all your existing premium styles – unchanged) */
+        /* (keep all your existing premium styles – they remain unchanged) */
         :root {
             --bg-primary: #0a0c10;
             --bg-secondary: #11161f;
@@ -583,11 +583,11 @@
                 });
             }
 
-            // ---------- Deriv OAuth (Corrected scope) ----------
+            // ---------- Deriv OAuth (Final Corrected Scope) ----------
             const DERIV_CLIENT_ID = '32F9XTfJ5NuRcYUeGCjIs'; // Your client_id
             const REDIRECT_URI = encodeURIComponent('https://quantara-trading-bots-platform.vercel.app/callback.html');
-            // ✅ CORRECT SCOPE: admin trade (space-separated, URL-encoded)
-            const SCOPES = encodeURIComponent('admin trade');
+            // ✅ CORRECT SCOPE: read trade (space-separated, URL-encoded)
+            const SCOPES = encodeURIComponent('read trade');
 
             const connectBtn = document.getElementById('derivConnectBtn');
             const connectText = document.getElementById('connectText');
@@ -623,7 +623,7 @@
                 }
             });
 
-            // Check if we returned from OAuth with code (handled by callback.html)
+            // Check if we returned from OAuth with code (handled by callback.html, but also direct fallback)
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('code')) {
                 const code = urlParams.get('code');
