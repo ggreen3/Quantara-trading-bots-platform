@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* (same as before – keep your existing premium styles) */
+        /* ---------- CSS Variables (Design Tokens) ---------- */
         :root {
             --bg-primary: #0a0c10;
             --bg-secondary: #11161f;
@@ -529,7 +529,7 @@
 
     <script>
         (function() {
-            // Bot data (same as before)
+            // Bot data (20+ bots)
             const bots = [
                 { id: 'basic-sma', name: 'Basic SMA', desc: 'Simple moving average crossover for educational use.', price: 'Free', tier: 'free', icon: '📊' },
                 { id: 'rsi-demo', name: 'RSI Demo', desc: 'Learn relative strength index signals.', price: 'Free', tier: 'free', icon: '📉' },
@@ -591,8 +591,6 @@
             const connectText = document.getElementById('connectText');
 
             function updateConnectionStatus() {
-                // For now, we don't store tokens because we need backend exchange.
-                // We'll just show "Connected" if we have a code in sessionStorage (temporary)
                 const hasCode = sessionStorage.getItem('deriv_auth_code');
                 if (hasCode) {
                     connectBtn.classList.add('connected');
@@ -609,13 +607,13 @@
                     sessionStorage.removeItem('deriv_auth_code');
                     updateConnectionStatus();
                 } else {
-                    // Build correct OAuth URL with client_id, response_type=code, scope
+                    // ✅ Fixed OAuth URL: client_id, response_type=code, scope
                     const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?client_id=${DERIV_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=read%20trade`;
                     window.location.href = oauthUrl;
                 }
             });
 
-            // Check if we returned from OAuth with a code (handled by callback.html, but we can also detect here)
+            // Check if we returned from OAuth with a code (handled by callback.html, but we also detect here)
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('code')) {
                 const code = urlParams.get('code');
