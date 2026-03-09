@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* (Keep all your existing premium styles – they remain unchanged) */
+        /* (keep all your existing premium styles – unchanged) */
         :root {
             --bg-primary: #0a0c10;
             --bg-secondary: #11161f;
@@ -529,7 +529,7 @@
 
     <script>
         (function() {
-            // Bot data (20+ bots)
+            // Bot data (20+ bots) – unchanged
             const bots = [
                 { id: 'basic-sma', name: 'Basic SMA', desc: 'Simple moving average crossover for educational use.', price: 'Free', tier: 'free', icon: '📊' },
                 { id: 'rsi-demo', name: 'RSI Demo', desc: 'Learn relative strength index signals.', price: 'Free', tier: 'free', icon: '📉' },
@@ -583,10 +583,11 @@
                 });
             }
 
-            // ---------- Deriv OAuth (Fixed per official docs) ----------
-            const DERIV_CLIENT_ID = '32F9XTfJ5NuRcYUeGCjIs'; // Your client_id from Deriv dashboard
+            // ---------- Deriv OAuth (Corrected scope) ----------
+            const DERIV_CLIENT_ID = '32F9XTfJ5NuRcYUeGCjIs'; // Your client_id
             const REDIRECT_URI = encodeURIComponent('https://quantara-trading-bots-platform.vercel.app/callback.html');
-            const SCOPES = encodeURIComponent('read,trade'); // Scopes you registered
+            // ✅ CORRECT SCOPE: admin trade (space-separated, URL-encoded)
+            const SCOPES = encodeURIComponent('admin trade');
 
             const connectBtn = document.getElementById('derivConnectBtn');
             const connectText = document.getElementById('connectText');
@@ -613,20 +614,24 @@
                     sessionStorage.removeItem('deriv_auth_code');
                     updateConnectionStatus();
                 } else {
-                    // Generate a random state for CSRF protection
                     const state = generateState();
                     sessionStorage.setItem('oauth_state', state);
 
-                    // Build correct OAuth URL as per official docs:
-                    // https://auth.deriv.com/oauth2/auth?client_id=...&redirect_uri=...&response_type=code&scope=...&state=...
+                    // Build OAuth URL with correct parameters
                     const oauthUrl = `https://auth.deriv.com/oauth2/auth?client_id=${DERIV_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=${SCOPES}&state=${state}`;
                     window.location.href = oauthUrl;
                 }
             });
 
             // Check if we returned from OAuth with code (handled by callback.html)
-            // The callback will store code and redirect back to '/'
-            // On page load, we update status.
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('code')) {
+                const code = urlParams.get('code');
+                sessionStorage.setItem('deriv_auth_code', code);
+                updateConnectionStatus();
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
 
             // Demo/Real toggle
             const demoButtons = document.querySelectorAll('#demoToggle button');
