@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* (keep all your existing premium styles – they remain unchanged) */
+        /* ---------- CSS Variables (Design Tokens) ---------- */
         :root {
             --bg-primary: #0a0c10;
             --bg-secondary: #11161f;
@@ -529,7 +529,7 @@
 
     <script>
         (function() {
-            // Bot data (20+ bots) – unchanged
+            // Bot data (20+ bots)
             const bots = [
                 { id: 'basic-sma', name: 'Basic SMA', desc: 'Simple moving average crossover for educational use.', price: 'Free', tier: 'free', icon: '📊' },
                 { id: 'rsi-demo', name: 'RSI Demo', desc: 'Learn relative strength index signals.', price: 'Free', tier: 'free', icon: '📉' },
@@ -583,23 +583,16 @@
                 });
             }
 
-            // ---------- Deriv OAuth (Final Corrected Scope) ----------
-            const DERIV_CLIENT_ID = '32F9XTfJ5NuRcYUeGCjIs'; // Your client_id
-            const REDIRECT_URI = encodeURIComponent('https://quantara-trading-bots-platform.vercel.app/callback.html');
-            // ✅ CORRECT SCOPE: read trade (space-separated, URL-encoded)
-            const SCOPES = encodeURIComponent('read trade');
+            // ---------- Deriv OAuth – Final Correct Version ----------
+            const DERIV_APP_ID = '32FdjBnT7wM8d88xwBoOQ'; // Your new App ID from Deriv
 
             const connectBtn = document.getElementById('derivConnectBtn');
             const connectText = document.getElementById('connectText');
 
-            function generateState() {
-                return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-            }
-
             function updateConnectionStatus() {
-                // Check if we have a stored code (temporary – real token exchange would happen on backend)
-                const hasCode = sessionStorage.getItem('deriv_auth_code');
-                if (hasCode) {
+                // Check if we have stored accounts (populated by callback.html)
+                const accounts = sessionStorage.getItem('deriv_accounts');
+                if (accounts) {
                     connectBtn.classList.add('connected');
                     connectText.textContent = 'Connected';
                 } else {
@@ -611,27 +604,18 @@
             connectBtn.addEventListener('click', () => {
                 if (connectBtn.classList.contains('connected')) {
                     // Disconnect: clear stored data
-                    sessionStorage.removeItem('deriv_auth_code');
+                    sessionStorage.removeItem('deriv_accounts');
+                    sessionStorage.removeItem('deriv_token');
                     updateConnectionStatus();
                 } else {
-                    const state = generateState();
-                    sessionStorage.setItem('oauth_state', state);
-
-                    // Build OAuth URL with correct parameters
-                    const oauthUrl = `https://auth.deriv.com/oauth2/auth?client_id=${DERIV_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=${SCOPES}&state=${state}`;
+                    // ✅ CORRECT: Only app_id is needed (per Deriv docs)
+                    const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${DERIV_APP_ID}`;
                     window.location.href = oauthUrl;
                 }
             });
 
-            // Check if we returned from OAuth with code (handled by callback.html, but also direct fallback)
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('code')) {
-                const code = urlParams.get('code');
-                sessionStorage.setItem('deriv_auth_code', code);
-                updateConnectionStatus();
-                // Clean URL
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
+            // Check if we already have accounts stored (e.g., after callback redirect)
+            updateConnectionStatus();
 
             // Demo/Real toggle
             const demoButtons = document.querySelectorAll('#demoToggle button');
@@ -645,7 +629,6 @@
             });
 
             renderBots();
-            updateConnectionStatus();
         })();
     </script>
 </body>
