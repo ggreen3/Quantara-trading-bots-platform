@@ -583,16 +583,17 @@
                 });
             }
 
-            // ---------- Deriv OAuth (Fixed) ----------
-            const DERIV_CLIENT_ID = '32F9XTfJ5NuRcYUeGCjIs'; // Your App ID (client_id)
+            // ---------- Deriv OAuth (Fixed according to official docs) ----------
+            const DERIV_APP_ID = '32F9XTfJ5NuRcYUeGCjIs'; // Your App ID from Deriv dashboard
             const REDIRECT_URI = encodeURIComponent('https://quantara-trading-bots-platform.vercel.app/callback.html');
 
             const connectBtn = document.getElementById('derivConnectBtn');
             const connectText = document.getElementById('connectText');
 
             function updateConnectionStatus() {
-                const hasCode = sessionStorage.getItem('deriv_auth_code');
-                if (hasCode) {
+                // Check if we have stored accounts (indicating successful auth)
+                const accounts = sessionStorage.getItem('deriv_accounts');
+                if (accounts) {
                     connectBtn.classList.add('connected');
                     connectText.textContent = 'Connected';
                 } else {
@@ -603,25 +604,21 @@
 
             connectBtn.addEventListener('click', () => {
                 if (connectBtn.classList.contains('connected')) {
-                    // Disconnect: clear any stored code
-                    sessionStorage.removeItem('deriv_auth_code');
+                    // Disconnect: clear stored data
+                    sessionStorage.removeItem('deriv_accounts');
+                    sessionStorage.removeItem('deriv_token');
                     updateConnectionStatus();
                 } else {
-                    // ✅ Fixed OAuth URL: client_id, response_type=code, scope
-                    const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?client_id=${DERIV_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=read%20trade`;
+                    // Build OAuth URL exactly as per Deriv documentation:
+                    // https://developers.deriv.com/docs/authentication#oauth-flow
+                    const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${DERIV_APP_ID}&redirect_uri=${REDIRECT_URI}`;
                     window.location.href = oauthUrl;
                 }
             });
 
-            // Check if we returned from OAuth with a code (handled by callback.html, but we also detect here)
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('code')) {
-                const code = urlParams.get('code');
-                sessionStorage.setItem('deriv_auth_code', code);
-                updateConnectionStatus();
-                // Clean URL
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
+            // Check if we returned from OAuth with account tokens (handled by callback.html)
+            // The callback will store accounts and redirect back to '/'
+            // So on page load, we just update connection status.
 
             // Demo/Real toggle
             const demoButtons = document.querySelectorAll('#demoToggle button');
