@@ -4,15 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quantara – AI Trading Bots for Deriv</title>
-    <!-- Favicon (robot emoji style) -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='40' r='30' fill='%233b82f6'/%3E%3Ccircle cx='35' cy='35' r='5' fill='white'/%3E%3Ccircle cx='65' cy='35' r='5' fill='white'/%3E%3Crect x='40' y='55' width='20' height='10' fill='%233b82f6'/%3E%3C/svg%3E">
-    <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ---------- CSS Variables (Design Tokens) ---------- */
+        /* All your existing CSS (unchanged) – I'll keep it compact but it's the same premium styles */
         :root {
             --bg-primary: #0a0c10;
             --bg-secondary: #11161f;
@@ -26,427 +24,66 @@
             --card-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
             --glow-color: rgba(59, 130, 246, 0.4);
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-            overflow-x: hidden;
-        }
-
-        .glass {
-            background: var(--bg-glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--border-glass);
-            border-radius: 24px;
-        }
-
-        .glass-card {
-            background: rgba(20, 30, 45, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid var(--border-glass);
-            border-radius: 24px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-        }
-
-        .glass-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 25px 50px -12px var(--glow-color);
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-
-        .gradient-text {
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            background-size: 200% 200%;
-            animation: gradient-shift 6s ease infinite;
-        }
-
-        @keyframes gradient-shift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .btn-primary {
-            background: var(--accent-gradient);
-            border: none;
-            color: white;
-            padding: 12px 32px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background-size: 200% 200%;
-            box-shadow: 0 10px 20px -8px var(--glow-color);
-        }
-
-        .btn-primary:hover {
-            transform: scale(1.02);
-            box-shadow: 0 15px 30px -8px #3b82f6;
-            background-position: 100% 100%;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-primary);
-            padding: 12px 32px;
-            border-radius: 40px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s ease, border-color 0.2s ease;
-        }
-
-        .btn-outline:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-connect {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            color: #3b82f6;
-            padding: 8px 20px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-connect:hover {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: #3b82f6;
-        }
-
-        .btn-connect.connected {
-            background: rgba(16, 185, 129, 0.1);
-            border-color: #10b981;
-            color: #10b981;
-        }
-
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .logo {
-            font-size: 2rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        .logo span {
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-secondary);
-            font-weight: 500;
-            transition: color 0.2s ease;
-        }
-
-        .nav-links a:hover {
-            color: white;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 16px;
-            align-items: center;
-        }
-
-        .demo-toggle {
-            display: flex;
-            align-items: center;
-            background: rgba(255,255,255,0.03);
-            border-radius: 40px;
-            padding: 4px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .demo-toggle button {
-            background: transparent;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 32px;
-            font-weight: 500;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: var(--text-secondary);
-        }
-
-        .demo-toggle button.active {
-            background: var(--accent-gradient);
-            color: white;
-        }
-
-        .hero {
-            padding: 80px 0 60px;
-            text-align: center;
-            position: relative;
-        }
-
-        .hero h1 {
-            font-size: 4.5rem;
-            font-weight: 700;
-            line-height: 1.1;
-            max-width: 1000px;
-            margin: 0 auto 24px;
-        }
-
-        .hero p {
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto 40px;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .floating-element {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle at 30% 50%, rgba(59,130,246,0.15), transparent 70%);
-            border-radius: 50%;
-            filter: blur(60px);
-            z-index: -1;
-            animation: float 12s infinite alternate ease-in-out;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+        .glass { background: var(--bg-glass); backdrop-filter: blur(12px); border: 1px solid var(--border-glass); border-radius: 24px; }
+        .glass-card { background: rgba(20, 30, 45, 0.4); backdrop-filter: blur(8px); border: 1px solid var(--border-glass); border-radius: 24px; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .glass-card:hover { transform: translateY(-6px); box-shadow: 0 25px 50px -12px var(--glow-color); border-color: rgba(59,130,246,0.3); }
+        .gradient-text { background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; background-size: 200% 200%; animation: gradient-shift 6s ease infinite; }
+        @keyframes gradient-shift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .btn-primary { background: var(--accent-gradient); border: none; color: white; padding: 12px 32px; border-radius: 40px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.2s ease; background-size: 200% 200%; box-shadow: 0 10px 20px -8px var(--glow-color); }
+        .btn-primary:hover { transform: scale(1.02); box-shadow: 0 15px 30px -8px #3b82f6; background-position: 100% 100%; }
+        .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary); padding: 12px 32px; border-radius: 40px; font-weight: 500; cursor: pointer; transition: background 0.2s ease; }
+        .btn-outline:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
+        .btn-connect { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); color: #3b82f6; padding: 8px 20px; border-radius: 40px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s ease; }
+        .btn-connect:hover { background: rgba(59,130,246,0.2); border-color: #3b82f6; }
+        .btn-connect.connected { background: rgba(16,185,129,0.1); border-color: #10b981; color: #10b981; }
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap; gap: 16px; }
+        .logo { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; }
+        .logo span { background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .nav-links { display: flex; gap: 32px; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--text-secondary); font-weight: 500; transition: color 0.2s ease; }
+        .nav-links a:hover { color: white; }
+        .header-actions { display: flex; gap: 16px; align-items: center; }
+        .demo-toggle { display: flex; align-items: center; background: rgba(255,255,255,0.03); border-radius: 40px; padding: 4px; border: 1px solid rgba(255,255,255,0.05); }
+        .demo-toggle button { background: transparent; border: none; padding: 8px 16px; border-radius: 32px; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; color: var(--text-secondary); }
+        .demo-toggle button.active { background: var(--accent-gradient); color: white; }
+        .hero { padding: 80px 0 60px; text-align: center; position: relative; }
+        .hero h1 { font-size: 4.5rem; font-weight: 700; line-height: 1.1; max-width: 1000px; margin: 0 auto 24px; }
+        .hero p { font-size: 1.25rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px; }
+        .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .floating-element { position: absolute; width: 300px; height: 300px; background: radial-gradient(circle at 30% 50%, rgba(59,130,246,0.15), transparent 70%); border-radius: 50%; filter: blur(60px); z-index: -1; animation: float 12s infinite alternate ease-in-out; }
         .floating-1 { top: -100px; left: -100px; }
         .floating-2 { bottom: -100px; right: -100px; background: radial-gradient(circle at 70% 30%, rgba(168,85,247,0.15), transparent 70%); }
-
-        @keyframes float {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(30px, 20px) scale(1.1); }
-        }
-
-        .section-title {
-            font-size: 2rem;
-            font-weight: 600;
-            margin: 60px 0 32px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .section-title-badge {
-            background: var(--accent-gradient);
-            padding: 4px 12px;
-            border-radius: 40px;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .bot-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
-        }
-
-        .bot-card {
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            text-decoration: none;
-            color: inherit;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .bot-card::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 24px;
-            padding: 2px;
-            background: var(--accent-gradient);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .bot-card:hover::after {
-            opacity: 0.5;
-        }
-
-        .bot-icon {
-            width: 56px;
-            height: 56px;
-            background: rgba(59,130,246,0.1);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            font-size: 2rem;
-        }
-
-        .bot-name {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .bot-desc {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-bottom: 20px;
-            flex: 1;
-        }
-
-        .bot-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: auto;
-        }
-
-        .bot-price {
-            font-weight: 700;
-            font-size: 1.3rem;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .bot-lease {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .bot-tag {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255,255,255,0.05);
-            padding: 4px 12px;
-            border-radius: 40px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
+        @keyframes float { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(30px,20px) scale(1.1); } }
+        .section-title { font-size: 2rem; font-weight: 600; margin: 60px 0 32px; display: flex; align-items: center; gap: 12px; }
+        .section-title-badge { background: var(--accent-gradient); padding: 4px 12px; border-radius: 40px; font-size: 0.9rem; font-weight: 500; }
+        .bot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+        .bot-card { padding: 24px; display: flex; flex-direction: column; height: 100%; text-decoration: none; color: inherit; position: relative; overflow: hidden; }
+        .bot-card::after { content: ''; position: absolute; inset: 0; border-radius: 24px; padding: 2px; background: var(--accent-gradient); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity 0.3s ease; }
+        .bot-card:hover::after { opacity: 0.5; }
+        .bot-icon { width: 56px; height: 56px; background: rgba(59,130,246,0.1); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 2rem; }
+        .bot-name { font-size: 1.5rem; font-weight: 600; margin-bottom: 8px; }
+        .bot-desc { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 20px; flex: 1; }
+        .bot-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+        .bot-price { font-weight: 700; font-size: 1.3rem; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .bot-lease { color: var(--text-muted); font-size: 0.9rem; }
+        .bot-tag { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 40px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         .bot-tag.free { background: rgba(16,185,129,0.2); color: #10b981; }
         .bot-tag.freemium { background: rgba(245,158,11,0.2); color: #f59e0b; }
         .bot-tag.premium { background: rgba(139,92,246,0.2); color: #8b5cf6; }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 32px;
-            margin: 80px 0;
-        }
-
-        .feature-item {
-            text-align: center;
-            padding: 32px;
-            background: rgba(255,255,255,0.02);
-            border-radius: 32px;
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 16px;
-            color: #3b82f6;
-        }
-
-        .feature-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .feature-desc {
-            color: var(--text-secondary);
-        }
-
-        footer {
-            border-top: 1px solid rgba(255,255,255,0.05);
-            padding: 40px 0;
-            margin-top: 80px;
-            text-align: center;
-            color: var(--text-muted);
-        }
-
-        footer a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        footer a:hover {
-            color: white;
-        }
-
-        @media (max-width: 768px) {
-            .hero h1 { font-size: 2.8rem; }
-            .features-grid { grid-template-columns: 1fr; }
-            .nav-links { display: none; }
-            header { flex-direction: column; align-items: stretch; }
-            .header-actions { justify-content: space-between; }
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .animate-in {
-            animation: fadeInUp 0.6s ease forwards;
-        }
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin: 80px 0; }
+        .feature-item { text-align: center; padding: 32px; background: rgba(255,255,255,0.02); border-radius: 32px; }
+        .feature-icon { font-size: 2.5rem; margin-bottom: 16px; color: #3b82f6; }
+        .feature-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 8px; }
+        .feature-desc { color: var(--text-secondary); }
+        footer { border-top: 1px solid rgba(255,255,255,0.05); padding: 40px 0; margin-top: 80px; text-align: center; color: var(--text-muted); }
+        footer a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s ease; }
+        footer a:hover { color: white; }
+        @media (max-width: 768px) { .hero h1 { font-size: 2.8rem; } .features-grid { grid-template-columns: 1fr; } .nav-links { display: none; } header { flex-direction: column; align-items: stretch; } .header-actions { justify-content: space-between; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-in { animation: fadeInUp 0.6s ease forwards; }
     </style>
 </head>
 <body>
@@ -529,7 +166,7 @@
 
     <script>
         (function() {
-            // Bot data (20+ bots)
+            // Bot data (unchanged)
             const bots = [
                 { id: 'basic-sma', name: 'Basic SMA', desc: 'Simple moving average crossover for educational use.', price: 'Free', tier: 'free', icon: '📊' },
                 { id: 'rsi-demo', name: 'RSI Demo', desc: 'Learn relative strength index signals.', price: 'Free', tier: 'free', icon: '📉' },
@@ -562,10 +199,8 @@
                     const card = document.createElement('a');
                     card.href = `bot.html?id=${bot.id}`;
                     card.className = 'bot-card glass-card';
-
                     const tierClass = bot.tier === 'free' ? 'free' : bot.tier === 'freemium' ? 'freemium' : 'premium';
                     const tierLabel = bot.tier === 'free' ? 'Free' : bot.tier === 'freemium' ? 'Freemium' : 'Premium';
-
                     card.innerHTML = `
                         <div class="bot-icon">${bot.icon}</div>
                         <div class="bot-name">${bot.name}</div>
@@ -576,23 +211,40 @@
                         </div>
                         <div class="bot-tag ${tierClass}">${tierLabel}</div>
                     `;
-
                     if (bot.tier === 'free') freeGrid.appendChild(card);
                     else if (bot.tier === 'freemium') freemiumGrid.appendChild(card);
                     else premiumGrid.appendChild(card);
                 });
             }
 
-            // ---------- Deriv OAuth – Final Correct Version ----------
-            const DERIV_APP_ID = '32FdjBnT7wM8d88xwBoOQ'; // Your new App ID from Deriv
+            // ---------- OAuth 2.0 PKCE Implementation ----------
+            const DERIV_CLIENT_ID = '32FdjBnT7wM8d88xwBoOQ'; // Your alphanumeric App ID
+            const REDIRECT_URI = encodeURIComponent('https://quantara-trading-bots-platform.vercel.app/callback.html');
+            const SCOPES = encodeURIComponent('trade'); // or 'admin trade'
 
             const connectBtn = document.getElementById('derivConnectBtn');
             const connectText = document.getElementById('connectText');
 
+            async function generatePKCE() {
+                // Generate code_verifier
+                const array = crypto.getRandomValues(new Uint8Array(64));
+                const codeVerifier = Array.from(array)
+                    .map(v => 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'[v % 66])
+                    .join('');
+                // Derive code_challenge
+                const encoder = new TextEncoder();
+                const data = encoder.encode(codeVerifier);
+                const hash = await crypto.subtle.digest('SHA-256', data);
+                const codeChallenge = btoa(String.fromCharCode(...new Uint8Array(hash)))
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=+$/, '');
+                return { codeVerifier, codeChallenge };
+            }
+
             function updateConnectionStatus() {
-                // Check if we have stored accounts (populated by callback.html)
-                const accounts = sessionStorage.getItem('deriv_accounts');
-                if (accounts) {
+                const token = sessionStorage.getItem('deriv_access_token');
+                if (token) {
                     connectBtn.classList.add('connected');
                     connectText.textContent = 'Connected';
                 } else {
@@ -601,21 +253,28 @@
                 }
             }
 
-            connectBtn.addEventListener('click', () => {
+            connectBtn.addEventListener('click', async () => {
                 if (connectBtn.classList.contains('connected')) {
-                    // Disconnect: clear stored data
-                    sessionStorage.removeItem('deriv_accounts');
-                    sessionStorage.removeItem('deriv_token');
+                    // Disconnect
+                    sessionStorage.removeItem('deriv_access_token');
+                    sessionStorage.removeItem('oauth_state');
+                    sessionStorage.removeItem('pkce_code_verifier');
                     updateConnectionStatus();
-                } else {
-                    // ✅ CORRECT: Only app_id is needed (per Deriv docs)
-                    const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${DERIV_APP_ID}`;
-                    window.location.href = oauthUrl;
+                    return;
                 }
-            });
 
-            // Check if we already have accounts stored (e.g., after callback redirect)
-            updateConnectionStatus();
+                // Generate PKCE parameters
+                const { codeVerifier, codeChallenge } = await generatePKCE();
+                const state = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
+                // Store for callback
+                sessionStorage.setItem('pkce_code_verifier', codeVerifier);
+                sessionStorage.setItem('oauth_state', state);
+
+                // Build OAuth URL
+                const authUrl = `https://auth.deriv.com/oauth2/auth?response_type=code&client_id=${DERIV_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${SCOPES}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
+                window.location.href = authUrl;
+            });
 
             // Demo/Real toggle
             const demoButtons = document.querySelectorAll('#demoToggle button');
@@ -623,12 +282,12 @@
                 btn.addEventListener('click', () => {
                     demoButtons.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-                    const mode = btn.dataset.mode;
-                    localStorage.setItem('trading_mode', mode);
+                    localStorage.setItem('trading_mode', btn.dataset.mode);
                 });
             });
 
             renderBots();
+            updateConnectionStatus();
         })();
     </script>
 </body>
