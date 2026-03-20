@@ -1,5 +1,6 @@
+// api/exchange.js
 export default async function handler(req, res) {
-  // Only allow POST requests
+  // Allow only POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -11,16 +12,16 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Exchange the code for tokens
+    // Exchange the code for an access token
     const tokenResponse = await fetch('https://auth.deriv.com/oauth2/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
         grant_type: 'authorization_code',
-        client_id: process.env.DERIV_CLIENT_ID, // Your alphanumeric App ID
+        client_id: process.env.DERIV_CLIENT_ID,    // Set in Vercel
         code: code,
         code_verifier: codeVerifier,
-        redirect_uri: process.env.DERIV_REDIRECT_URI,
+        redirect_uri: process.env.DERIV_REDIRECT_URI, // Set in Vercel
       }).toString(),
     });
 
