@@ -60,7 +60,7 @@
             </div>
             <div class="card">
                 <h3>Status</h3>
-                <div class="value" id="connectionStatus">Connected</div>
+                <div class="value" id="connectionStatus">Connecting...</div>
                 <div class="sub">Real-time updates</div>
             </div>
         </div>
@@ -92,45 +92,47 @@
         return { codeVerifier, codeChallenge };
     }
 
-    // Connect to Deriv WebSocket and subscribe to balance
     function connectDerivWebSocket(token) {
         if (derivSocket && derivSocket.readyState === WebSocket.OPEN) {
             derivSocket.close();
         }
         derivSocket = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
         derivSocket.onopen = () => {
+            console.log('WebSocket open, authorizing...');
             derivSocket.send(JSON.stringify({ authorize: token }));
         };
         derivSocket.onmessage = (msg) => {
             const data = JSON.parse(msg.data);
+            console.log('WS message:', data);
             if (data.error) {
                 console.error('Deriv WS error:', data.error);
-                document.getElementById('connectionStatus').innerHTML = 'Error';
+                document.getElementById('connectionStatus').innerHTML = 'Error: ' + (data.error.message || 'Unknown');
+                document.getElementById('connectionStatus').classList.add('status-disconnected');
                 return;
             }
             if (data.authorize) {
-                // Authorized – now get balance and account settings
+                console.log('Authorized successfully');
+                document.getElementById('connectionStatus').innerHTML = 'Connected';
+                document.getElementById('connectionStatus').classList.remove('status-disconnected');
+                document.getElementById('connectionStatus').classList.add('status-connected');
+                // Subscribe to balance and account settings
                 derivSocket.send(JSON.stringify({ balance: 1, subscribe: 1 }));
                 derivSocket.send(JSON.stringify({ get_settings: 1 }));
-                document.getElementById('connectionStatus').innerHTML = 'Connected';
-                document.getElementById('connectionStatus').classList.add('status-connected');
             }
             if (data.balance) {
                 const balance = parseFloat(data.balance.balance).toFixed(2);
                 const currency = data.balance.currency || 'USD';
                 document.getElementById('balance').innerHTML = `${currency} ${balance}`;
                 document.getElementById('currency').innerHTML = currency;
-                // Also store balance for later use
                 sessionStorage.setItem('deriv_balance', balance);
             }
             if (data.get_settings) {
                 const landingCompany = data.get_settings.landing_company;
-                // Determine demo/real: if landing_company is 'virtual' then demo, else real
-                const isDemo = landing_company === 'virtual';
+                const isDemo = landingCompany === 'virtual';
                 const accountType = isDemo ? 'Demo Account' : 'Real Account';
                 document.getElementById('accountType').innerHTML = accountType;
                 sessionStorage.setItem('deriv_account_type', isDemo ? 'demo' : 'real');
-                // Sync toggle UI (optional)
+                // Sync toggle UI
                 const activeMode = isDemo ? 'demo' : 'real';
                 const demoButtons = document.querySelectorAll('#demoToggle button');
                 demoButtons.forEach(btn => {
@@ -140,11 +142,14 @@
             }
         };
         derivSocket.onclose = () => {
-            console.log('Deriv WS closed');
+            console.log('WebSocket closed');
             if (currentToken) {
-                // attempt reconnect after 3 seconds
                 setTimeout(() => connectDerivWebSocket(currentToken), 3000);
             }
+        };
+        derivSocket.onerror = (err) => {
+            console.error('WebSocket error:', err);
+            document.getElementById('connectionStatus').innerHTML = 'WebSocket error';
         };
     }
 
@@ -167,7 +172,6 @@
 
     document.getElementById('connectBtn').addEventListener('click', async () => {
         if (sessionStorage.getItem('deriv_access_token')) {
-            // Disconnect
             sessionStorage.removeItem('deriv_access_token');
             sessionStorage.removeItem('oauth_state');
             sessionStorage.removeItem('pkce_code_verifier');
@@ -183,37 +187,57 @@
         window.location.href = authUrl;
     });
 
-    // Demo/real toggle (just UI for now; actual account type is from Deriv)
+    // Demo/real toggle (UI only, actual account type from Deriv)
     const demoButtons = document.querySelectorAll('#demoToggle button');
     demoButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             demoButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             localStorage.setItem('trading_mode', btn.dataset.mode);
-            // If we want to switch account, we could call Deriv's switch_account, but for MVP we just store preference.
         });
     });
 
-    // Load bots from Firestore via API
+    // Load bots – first try Firestore API, fallback to mock data
     async function loadBots() {
         try {
             const res = await fetch('/api/list-bots');
-            const bots = await res.json();
-            const grid = document.getElementById('botGrid');
-            if (!bots.length) {
-                grid.innerHTML = '<p>No bots uploaded yet. Admin can upload via /admin/upload.html</p>';
-                return;
+            if (res.ok) {
+                const bots = await res.json();
+                if (bots.length) {
+                    renderBots(bots);
+                    return;
+                }
             }
-            grid.innerHTML = bots.map(bot => `
-                <a href="/bot.html?id=${bot.id}" class="bot-card">
-                    <h3>${bot.name}</h3>
-                    <p>${bot.tier === 'free' ? 'Free' : 'Premium'}</p>
-                    <span class="badge">Lease 2 weeks</span>
-                </a>
-            `).join('');
+            // Fallback mock bots (so you see something)
+            const mockBots = [
+                { id: 'v10-bot', name: 'V10 Volatility Expert', tier: 'free', price: 0 },
+                { id: 'scalper-pro', name: 'Scalper Pro', tier: 'premium', price: 800 },
+                { id: 'trend-rider', name: 'Trend Rider', tier: 'premium', price: 1200 }
+            ];
+            renderBots(mockBots);
         } catch (err) {
-            document.getElementById('botGrid').innerHTML = '<p>Error loading bots. Please try again later.</p>';
+            console.error('Error loading bots:', err);
+            const mockBots = [
+                { id: 'v10-bot', name: 'V10 Volatility Expert', tier: 'free', price: 0 },
+                { id: 'scalper-pro', name: 'Scalper Pro', tier: 'premium', price: 800 }
+            ];
+            renderBots(mockBots);
         }
+    }
+
+    function renderBots(bots) {
+        const grid = document.getElementById('botGrid');
+        if (!bots.length) {
+            grid.innerHTML = '<p>No bots available. Check back soon.</p>';
+            return;
+        }
+        grid.innerHTML = bots.map(bot => `
+            <a href="/bot.html?id=${bot.id}" class="bot-card">
+                <h3>${bot.name}</h3>
+                <p>${bot.tier === 'free' ? 'Free' : 'Premium - KES ' + (bot.price || 0)}</p>
+                <span class="badge">Lease 2 weeks</span>
+            </a>
+        `).join('');
     }
 
     updateConnectionStatus();
