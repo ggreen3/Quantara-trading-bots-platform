@@ -58,7 +58,6 @@
             const storedState = sessionStorage.getItem('oauth_state');
             const codeVerifier = sessionStorage.getItem('pkce_code_verifier');
 
-            // Verify state
             if (state && storedState && state !== storedState) {
                 statusEl.innerHTML = '<span class="error">❌ Security error: state mismatch</span>';
                 loaderEl.style.display = 'none';
@@ -67,7 +66,6 @@
 
             if (code && codeVerifier) {
                 try {
-                    // Exchange code for access token via backend
                     const response = await fetch('/api/exchange', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -94,7 +92,6 @@
                 loaderEl.style.display = 'none';
             }
 
-            // Clear PKCE and state after use (whether success or failure)
             sessionStorage.removeItem('oauth_state');
             sessionStorage.removeItem('pkce_code_verifier');
         })();
