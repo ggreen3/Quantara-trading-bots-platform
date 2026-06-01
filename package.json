@@ -1,0 +1,8 @@
+{
+  "name": "quantara-bots",
+  "version": "1.0.0",
+  "dependencies": {
+    "firebase-admin": "^11.11.0",
+    "formidable-serverless": "^1.1.1"
+  }
+}
