@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head><title>Admin Upload Bot</title><style>body{font-family:system-ui;background:#0a0c10;color:white;padding:2rem;}.card{background:#1e293b;padding:2rem;border-radius:1rem;max-width:600px;margin:auto;}input,select,button{display:block;width:100%;margin:1rem 0;padding:0.75rem;border-radius:0.5rem;}button{background:#3b82f6;color:white;font-weight:bold;cursor:pointer;}</style></head>
+<body><div class="card"><h2>Upload Trading Bot</h2>
+<input type="password" id="adminPass" placeholder="Admin Password">
+<input type="file" id="botFile" accept=".html">
+<input type="text" id="botId" placeholder="Bot ID (e.g., v10-bot)">
+<input type="text" id="botName" placeholder="Bot Name">
+<select id="tier"><option value="free">Free</option><option value="premium">Premium</option></select>
+<button onclick="upload()">Upload</button>
+<div id="result"></div></div>
+<script>
+async function upload() {
+    const pass = document.getElementById('adminPass').value;
+    const file = document.getElementById('botFile').files[0];
+    const id = document.getElementById('botId').value;
+    const name = document.getElementById('botName').value;
+    const tier = document.getElementById('tier').value;
+    if (!pass || !file || !id || !name) return alert('Fill all fields');
+    const formData = new FormData();
+    formData.append('html', file);
+    formData.append('id', id);
+    formData.append('name', name);
+    formData.append('tier', tier);
+    const res = await fetch('/api/admin/upload-bot', {
+        method: 'POST',
+        headers: { 'x-admin-password': pass },
+        body: formData
+    });
+    const data = await res.json();
+    document.getElementById('result').innerHTML = JSON.stringify(data, null, 2);
+}
+</script>
+</body>
+</html>
