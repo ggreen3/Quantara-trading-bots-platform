@@ -1,12 +1,11 @@
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const { code, codeVerifier } = req.body;
-  if (!code || !codeVerifier) {
-    return res.status(400).json({ error: 'Missing code or codeVerifier' });
-  }
+  if (!code || !codeVerifier) return res.status(400).json({ error: 'Missing code or codeVerifier' });
+
+  // Log environment variables (remove after debugging)
+  console.log('DERIV_CLIENT_ID exists?', !!process.env.DERIV_CLIENT_ID);
+  console.log('DERIV_REDIRECT_URI exists?', !!process.env.DERIV_REDIRECT_URI);
 
   try {
     const tokenResponse = await fetch('https://auth.deriv.com/oauth2/token', {
@@ -22,9 +21,9 @@ export default async function handler(req, res) {
     });
 
     const data = await tokenResponse.json();
+    console.log('Token exchange status:', tokenResponse.status, data);
 
     if (!tokenResponse.ok) {
-      console.error('Token exchange error:', data);
       return res.status(tokenResponse.status).json({ error: data.error_description || 'Token exchange failed' });
     }
 
