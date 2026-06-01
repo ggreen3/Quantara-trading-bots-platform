@@ -96,29 +96,36 @@
         if (derivSocket && derivSocket.readyState === WebSocket.OPEN) {
             derivSocket.close();
         }
-        derivSocket = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
+        // Use the correct WebSocket URL without app_id (or with your app ID)
+        derivSocket = new WebSocket('wss://ws.derivws.com/websockets/v3');
+        
         derivSocket.onopen = () => {
-            console.log('WebSocket open, authorizing...');
+            console.log('WebSocket open, authorizing with token:', token.substring(0, 20) + '...');
             derivSocket.send(JSON.stringify({ authorize: token }));
         };
+        
         derivSocket.onmessage = (msg) => {
             const data = JSON.parse(msg.data);
             console.log('WS message:', data);
+            
             if (data.error) {
-                console.error('Deriv WS error:', data.error);
-                document.getElementById('connectionStatus').innerHTML = 'Error: ' + (data.error.message || 'Unknown');
+                console.error('Deriv error:', data.error);
+                document.getElementById('connectionStatus').innerHTML = `Error: ${data.error.message || 'Unknown'}`;
                 document.getElementById('connectionStatus').classList.add('status-disconnected');
                 return;
             }
+            
             if (data.authorize) {
                 console.log('Authorized successfully');
                 document.getElementById('connectionStatus').innerHTML = 'Connected';
                 document.getElementById('connectionStatus').classList.remove('status-disconnected');
                 document.getElementById('connectionStatus').classList.add('status-connected');
-                // Subscribe to balance and account settings
+                // Subscribe to balance
                 derivSocket.send(JSON.stringify({ balance: 1, subscribe: 1 }));
+                // Get account settings (demo/real)
                 derivSocket.send(JSON.stringify({ get_settings: 1 }));
             }
+            
             if (data.balance) {
                 const balance = parseFloat(data.balance.balance).toFixed(2);
                 const currency = data.balance.currency || 'USD';
@@ -126,6 +133,7 @@
                 document.getElementById('currency').innerHTML = currency;
                 sessionStorage.setItem('deriv_balance', balance);
             }
+            
             if (data.get_settings) {
                 const landingCompany = data.get_settings.landing_company;
                 const isDemo = landingCompany === 'virtual';
@@ -141,12 +149,15 @@
                 });
             }
         };
-        derivSocket.onclose = () => {
-            console.log('WebSocket closed');
+        
+        derivSocket.onclose = (event) => {
+            console.log('WebSocket closed', event);
             if (currentToken) {
-                setTimeout(() => connectDerivWebSocket(currentToken), 3000);
+                // Reconnect after 5 seconds
+                setTimeout(() => connectDerivWebSocket(currentToken), 5000);
             }
         };
+        
         derivSocket.onerror = (err) => {
             console.error('WebSocket error:', err);
             document.getElementById('connectionStatus').innerHTML = 'WebSocket error';
@@ -197,7 +208,7 @@
         });
     });
 
-    // Load bots – first try Firestore API, fallback to mock data
+    // Load bots – try API, fallback to mock
     async function loadBots() {
         try {
             const res = await fetch('/api/list-bots');
@@ -208,7 +219,7 @@
                     return;
                 }
             }
-            // Fallback mock bots (so you see something)
+            // Mock bots
             const mockBots = [
                 { id: 'v10-bot', name: 'V10 Volatility Expert', tier: 'free', price: 0 },
                 { id: 'scalper-pro', name: 'Scalper Pro', tier: 'premium', price: 800 },
@@ -217,11 +228,9 @@
             renderBots(mockBots);
         } catch (err) {
             console.error('Error loading bots:', err);
-            const mockBots = [
-                { id: 'v10-bot', name: 'V10 Volatility Expert', tier: 'free', price: 0 },
-                { id: 'scalper-pro', name: 'Scalper Pro', tier: 'premium', price: 800 }
-            ];
-            renderBots(mockBots);
+            renderBots([
+                { id: 'v10-bot', name: 'V10 Volatility Expert', tier: 'free', price: 0 }
+            ]);
         }
     }
 
