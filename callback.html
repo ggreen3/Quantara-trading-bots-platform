@@ -11,6 +11,8 @@
     const storedState = sessionStorage.getItem('oauth_state');
     const codeVerifier = sessionStorage.getItem('pkce_code_verifier');
     
+    console.log('Callback: code=', code, 'state=', state, 'storedState=', storedState);
+    
     if (state !== storedState) {
         document.body.innerHTML = '<h3>Security error: state mismatch</h3>';
         return;
@@ -27,8 +29,10 @@
             body: JSON.stringify({ code, codeVerifier })
         });
         const data = await res.json();
+        console.log('Exchange response:', data);
         if (res.ok && data.access_token) {
             sessionStorage.setItem('deriv_access_token', data.access_token);
+            console.log('Token stored:', data.access_token.substring(0,20)+'...');
             sessionStorage.removeItem('oauth_state');
             sessionStorage.removeItem('pkce_code_verifier');
             window.location.href = '/';
@@ -36,6 +40,7 @@
             document.body.innerHTML = `<h3>Exchange failed: ${data.error || 'Unknown'}</h3>`;
         }
     } catch (err) {
+        console.error(err);
         document.body.innerHTML = `<h3>Error: ${err.message}</h3>`;
     }
 })();
