@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head><title>Connecting...</title></head>
+<body style="background:#0a0c10;color:white;text-align:center;padding:50px;">
+<div>Connecting your Deriv account...</div>
+<script>
+(async () => {
+    const params = new URLSearchParams(location.search);
+    const code = params.get('code');
+    const state = params.get('state');
+    const storedState = sessionStorage.getItem('oauth_state');
+    const codeVerifier = sessionStorage.getItem('pkce_code_verifier');
+    if (!code || !codeVerifier || state !== storedState) {
+        document.body.innerHTML = '<h3>Invalid OAuth response</h3>';
+        return;
+    }
+    const res = await fetch('/api/exchange', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, codeVerifier })
+    });
+    const data = await res.json();
+    if (res.ok && data.access_token) {
+        sessionStorage.setItem('deriv_access_token', data.access_token);
+        sessionStorage.removeItem('oauth_state');
+        sessionStorage.removeItem('pkce_code_verifier');
+        window.location.href = '/';
+    } else {
+        document.body.innerHTML = `<h3>Exchange failed: ${data.error}</h3>`;
+    }
+})();
+</script>
+</body>
+</html>
