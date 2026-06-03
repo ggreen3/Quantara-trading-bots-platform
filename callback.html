@@ -2,31 +2,59 @@
 <html>
 <head><title>Connecting...</title></head>
 <body style="background:#0a0c10;color:white;text-align:center;padding:50px;">
-<div>Connecting your Deriv account...</div>
+<div id="message">Connecting your Deriv account...</div>
 <script>
 (async () => {
-    const params = new URLSearchParams(location.search);
-    const code = params.get('code');
-    const state = params.get('state');
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
     const storedState = sessionStorage.getItem('oauth_state');
     const codeVerifier = sessionStorage.getItem('pkce_code_verifier');
-    if (!code || !codeVerifier || state !== storedState) {
-        document.body.innerHTML = '<h3>Invalid OAuth response</h3>';
+
+    // Log the values for debugging
+    console.log('code:', code);
+    console.log('state:', state);
+    console.log('storedState:', storedState);
+    console.log('codeVerifier:', codeVerifier ? codeVerifier.substring(0, 20) + '...' : 'null');
+
+    // Simplified validation logic
+    if (!code) {
+        document.getElementById('message').innerHTML = '<h3>Error: No authorization code received.</h3>';
         return;
     }
-    const res = await fetch('/api/exchange', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, codeVerifier })
-    });
-    const data = await res.json();
-    if (res.ok && data.access_token) {
-        sessionStorage.setItem('deriv_access_token', data.access_token);
-        sessionStorage.removeItem('oauth_state');
-        sessionStorage.removeItem('pkce_code_verifier');
-        window.location.href = '/';
-    } else {
-        document.body.innerHTML = `<h3>Exchange failed: ${data.error}</h3>`;
+    if (!codeVerifier) {
+        document.getElementById('message').innerHTML = '<h3>Error: PKCE code verifier missing. Please restart the connection process.</h3>';
+        return;
+    }
+    if (state !== storedState) {
+        console.warn(`State mismatch! URL state: ${state}, Stored state: ${storedState}`);
+        document.getElementById('message').innerHTML = '<h3>Error: Security check failed. Please restart the connection process.</h3>';
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/exchange', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code, codeVerifier })
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Token exchange failed');
+        }
+
+        if (data.access_token) {
+            sessionStorage.setItem('deriv_access_token', data.access_token);
+            sessionStorage.removeItem('oauth_state');
+            sessionStorage.removeItem('pkce_code_verifier');
+            window.location.href = '/';
+        } else {
+            throw new Error('No access token in response');
+        }
+    } catch (err) {
+        console.error('Exchange error:', err);
+        document.getElementById('message').innerHTML = `<h3>Connection Error: ${err.message}</h3><p>Please try again.</p>`;
     }
 })();
 </script>
