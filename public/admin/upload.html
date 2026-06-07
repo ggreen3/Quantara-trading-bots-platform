@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin – Upload Bot</title>
+    <style>
+        body { background: #0a0c10; color: white; font-family: monospace; padding: 2rem; }
+        .card { max-width: 600px; margin: auto; background: #1e293b; padding: 2rem; border-radius: 1rem; }
+        input, textarea, button { width: 100%; margin: 0.5rem 0; padding: 0.75rem; border-radius: 0.5rem; border: none; }
+        button { background: #3b82f6; color: white; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h2>Upload Bot</h2>
+    <input type="password" id="adminPass" placeholder="Admin Password">
+    <input type="text" id="botId" placeholder="Bot ID (e.g., v10-bot)">
+    <input type="text" id="botName" placeholder="Bot Name">
+    <select id="tier">
+        <option value="free">Free</option>
+        <option value="premium">Premium</option>
+    </select>
+    <input type="number" id="price" placeholder="Price (KES) - for premium" value="0">
+    <input type="file" id="botFile" accept=".html">
+    <button onclick="upload()">Upload</button>
+    <div id="result"></div>
+</div>
+<script>
+async function upload() {
+    const pass = document.getElementById('adminPass').value;
+    if (pass !== 'quantaraadmin33') return alert('Wrong password');
+    const file = document.getElementById('botFile').files[0];
+    if (!file) return alert('Select file');
+    const id = document.getElementById('botId').value;
+    const name = document.getElementById('botName').value;
+    const tier = document.getElementById('tier').value;
+    const price = parseInt(document.getElementById('price').value) || 0;
+    const html = await file.text();
+    const res = await fetch('/api/admin/upload-bot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, name, tier, price, html, pass })
+    });
+    const data = await res.json();
+    document.getElementById('result').innerHTML = JSON.stringify(data);
+}
+</script>
+</body>
+</html>
