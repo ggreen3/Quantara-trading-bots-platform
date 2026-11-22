@@ -17,7 +17,8 @@
         const res = await fetch(`/api/bot-content?id=${botId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
-                'X-Deriv-Account-Id': sessionStorage.getItem('deriv_account_id') || ''
+                'X-Deriv-Account-Id': sessionStorage.getItem('deriv_account_id') || '',
+                'X-Deriv-Balance': sessionStorage.getItem('deriv_balance') || '0'
             }
         });
         if (!res.ok) throw new Error(await res.text());

@@ -29,7 +29,8 @@ export default async function handler(req, res) {
     const config = {
       token: accessToken,
       accountId: req.headers['x-deriv-account-id'] || '',
-      appId: process.env.DERIV_APP_ID || '32FdjBnT7wM8d88xwBoOQ'
+      appId: process.env.DERIV_APP_ID || '32FdjBnT7wM8d88xwBoOQ',
+      balance: req.headers['x-deriv-balance'] || '0'
     };
     const bridgeScript = `<script>window.__QUANTARA__=${JSON.stringify(config)};</script><script src="/bridge.js"></script>`;
     html = html.replace('</head>', bridgeScript + '</head>');

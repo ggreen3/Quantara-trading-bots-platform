@@ -5,6 +5,7 @@
   var token = cfg.token || '';
   var accountId = cfg.accountId || '';
   var appId = cfg.appId || '32FdjBnT7wM8d88xwBoOQ';
+  var balance = cfg.balance || '0';
 
   window.__DERIV_TOKEN__ = token;
   window.__QUANTARA_ACCOUNT_ID__ = accountId;
@@ -119,14 +120,18 @@
       try { msg = JSON.parse(data); } catch (e) {}
 
       if (msg && Object.prototype.hasOwnProperty.call(msg, 'authorize')) {
+        var auth = {
+          account_id: accountId,
+          loginid: accountId,
+          is_virtual: /^(D|V|DOM)/i.test(accountId) ? 1 : 0,
+          currency: 'USD',
+          balance: balance
+        };
         emit('message', {
           data: JSON.stringify({
             msg_type: 'authorization',
-            authorization: {
-              account_id: accountId,
-              is_virtual: /^(D|V|DOM)/i.test(accountId) ? 1 : 0,
-              currency: 'USD'
-            },
+            authorization: auth,
+            authorize: auth,
             req_id: msg.req_id
           })
         });
