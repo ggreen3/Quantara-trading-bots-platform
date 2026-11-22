@@ -68,6 +68,10 @@
 
   var NativeWS = window.WebSocket;
 
+  function own(obj, key, value) {
+    Object.defineProperty(obj, key, { value: value, writable: true, configurable: true, enumerable: true });
+  }
+
   function CompatWebSocket(url, protocols) {
     if (!(this instanceof CompatWebSocket)) return new CompatWebSocket(url, protocols);
 
@@ -76,14 +80,14 @@
     this._queue = [];
     this._listeners = {};
     this._closed = false;
-    this.onopen = null;
-    this.onmessage = null;
-    this.onerror = null;
-    this.onclose = null;
-    this.url = String(url);
-    this.protocol = '';
-    this.bufferedAmount = 0;
-    this.extensions = '';
+    own(this, 'onopen', null);
+    own(this, 'onmessage', null);
+    own(this, 'onerror', null);
+    own(this, 'onclose', null);
+    own(this, 'url', String(url));
+    own(this, 'protocol', '');
+    own(this, 'bufferedAmount', 0);
+    own(this, 'extensions', '');
 
     Object.defineProperty(this, 'readyState', {
       get: function () { return self._native ? self._native.readyState : (self._closed ? 3 : 0); }
