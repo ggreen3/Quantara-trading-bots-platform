@@ -267,6 +267,7 @@
       if (!r.ok || (b.errors && b.errors.length)) throw new Error((b.errors && b.errors[0].message) || 'OTP failed');
       return b.data.url;
     }); }).then(function (url) {
+      self.log('Opening WebSocket ' + String(url).slice(0, 70));
       return new Promise(function (resolve, reject) {
         var ws = new WebSocket(url);
         self.socket = ws;
@@ -287,7 +288,7 @@
         };
         ws.onmessage = function (e) { self.handle(JSON.parse(e.data)); };
         ws.onerror = function () { self.log('WebSocket error', 'bad'); if (!done) { done = true; reject(new Error('WebSocket error')); } };
-        ws.onclose = function () { self.connected = false; self.onStatus('Disconnected', false); self.log('WebSocket closed', 'bad'); };
+        ws.onclose = function (e) { self.connected = false; self.onStatus('Disconnected', false); self.log('WebSocket closed ' + (e && e.code ? e.code + ' ' + String(e.reason || '').slice(0, 60) : ''), 'bad'); };
       });
     });
   };
