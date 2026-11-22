@@ -468,6 +468,13 @@
       self.pendingContracts[b.buy.contract_id] = strategy.id;
       self.send({ proposal_open_contract: 1, contract_id: b.buy.contract_id, subscribe: 1 }).catch(function () {});
       self.log('Bought #' + b.buy.contract_id + ' ' + strategy.name, 'ok');
+      if (self.targetHit) {
+        self.send({ sell: Number(b.buy.contract_id), price: 0 }).then(function () {
+          self.log('Closed late contract #' + b.buy.contract_id, 'ok');
+        }).catch(function (e) {
+          self.log('Could not close late #' + b.buy.contract_id + ': ' + e.message, 'bad');
+        });
+      }
     }).catch(function (e) {
       if (/rate limit/i.test(e.message)) {
         self.backoffUntil = Date.now() + 30000;
