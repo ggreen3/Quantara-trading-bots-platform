@@ -26,9 +26,13 @@ export default async function handler(req, res) {
     if (!doc.exists) return res.status(404).json({ error: 'Bot not found' });
 
     let html = doc.data().htmlContent || '';
-    const token = JSON.stringify(accessToken);
-    const tokenScript = `<script>window.__DERIV_TOKEN__=${token};document.addEventListener('DOMContentLoaded',()=>{const inp=document.getElementById('apiToken');if(inp){inp.value=${token};inp.style.display='none';}});</script>`;
-    html = html.replace('</head>', tokenScript + '</head>');
+    const config = {
+      token: accessToken,
+      accountId: req.headers['x-deriv-account-id'] || '',
+      appId: process.env.DERIV_APP_ID || '32FdjBnT7wM8d88xwBoOQ'
+    };
+    const bridgeScript = `<script>window.__QUANTARA__=${JSON.stringify(config)};</script><script src="/bridge.js"></script>`;
+    html = html.replace('</head>', bridgeScript + '</head>');
 
     const allowed = ['localhost', '127.0.0.1', process.env.VERCEL_URL].filter(Boolean);
     if (allowed.length) {
