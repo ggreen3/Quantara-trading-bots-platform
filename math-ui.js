@@ -49,7 +49,7 @@
     '<div class="grid">' +
     '<div><label>Stake (USD)</label><input id="stake" type="number" min="0.35" step="0.35" value="1"></div>' +
     '<div><label>Duration (s)</label><input id="duration" type="number" min="15" value="' + (all ? 60 : chosen[0].duration) + '"></div>' +
-    '<div><label>Cooldown (s)</label><input id="cooldown" type="number" min="1" value="5"></div>' +
+    '<div><label>Cooldown (s)</label><input id="cooldown" type="number" min="1" value="' + (all ? 30 : 15) + '"></div>' +
     '<div><label>Max trades</label><input id="maxTrades" type="number" min="1" value="20"></div>' +
     '<div><label>Loss limit (USD)</label><input id="lossLimit" type="number" min="1" value="50"></div>' +
     '</div>' +
@@ -61,7 +61,7 @@
     '<div class="panel"><div class="log" id="log"></div></div>';
 
   var $ = function (i) { return document.getElementById(i); };
-  var engine = new window.QuantaraMath.MathEngine(cfg, {});
+  var engine = new window.QuantaraMath.MathEngine(cfg, { globalSpacing: all ? 5000 : 3000 });
   chosen.forEach(function (s) { engine.enable(s.id, true); });
 
   function opts() {

@@ -229,6 +229,9 @@
     this.pending = {};
     this.pendingContracts = {};
     this.session = { trades: 0, pnl: 0, won: 0, lost: 0 };
+    this.busy = false;
+    this.lastProposalAt = 0;
+    this.backoffUntil = 0;
     this.onStatus = function () {};
     this.onLog = function () {};
     this.onUpdate = function () {};
@@ -357,6 +360,8 @@
     var self = this;
     var isDemo = /^(D|V|DOM)/i.test(this.cfg.accountId || '');
     if (!isDemo && !this.opts.realArmed) return;
+    if (Date.now() < this.backoffUntil) return;
+    if (this.busy) return;
     if (this.session.trades >= (this.opts.maxTrades || 20)) return;
     if (this.session.pnl <= -(this.opts.lossLimit || 50)) return;
 
@@ -379,13 +384,18 @@
 
   MathEngine.prototype.trade = function (strategy, signal) {
     var self = this;
+    var now = Date.now();
+    var spacing = this.opts.globalSpacing || 3000;
+    if (this.busy || now - this.lastProposalAt < spacing) return;
+    this.busy = true;
+    this.lastProposalAt = now;
+
     var stake = (this.opts.stake || 1) * (signal.mult || 1);
     var duration = this.opts.duration || strategy.duration || 60;
-    var currency = 'USD';
     this.log(strategy.name + ': ' + signal.action + ' - ' + signal.reason + ' @ ' + stake.toFixed(2));
     this.send({
       proposal: 1, amount: stake, basis: 'stake', contract_type: signal.action,
-      currency: currency, duration: duration, duration_unit: 's',
+      currency: 'USD', duration: duration, duration_unit: 's',
       underlying_symbol: strategy.symbol
     }).then(function (p) {
       if (!p.proposal || !p.proposal.id) throw new Error('No proposal');
@@ -396,7 +406,14 @@
       self.send({ proposal_open_contract: 1, contract_id: b.buy.contract_id, subscribe: 1 }).catch(function () {});
       self.log('Bought #' + b.buy.contract_id + ' ' + strategy.name, 'ok');
     }).catch(function (e) {
-      self.log('Trade rejected: ' + e.message, 'bad');
+      if (/rate limit/i.test(e.message)) {
+        self.backoffUntil = Date.now() + 30000;
+        self.log('Deriv rate limit - pausing proposals for 30s', 'warn');
+      } else {
+        self.log('Trade rejected: ' + e.message, 'bad');
+      }
+    }).then(function () {
+      self.busy = false;
     });
   };
 
