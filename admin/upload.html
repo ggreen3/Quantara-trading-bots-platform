@@ -27,7 +27,7 @@
 <script>
 async function upload() {
     const pass = document.getElementById('adminPass').value;
-    if (pass !== 'quantaraadmin33') return alert('Wrong password');
+    if (!pass) return alert('Enter the admin password');
     const file = document.getElementById('botFile').files[0];
     if (!file) return alert('Select file');
     const id = document.getElementById('botId').value;
@@ -35,7 +35,7 @@ async function upload() {
     const tier = document.getElementById('tier').value;
     const price = parseInt(document.getElementById('price').value) || 0;
     const html = await file.text();
-    const res = await fetch('/api/admin/upload-bot', {
+    const res = await fetch('/api/upload-bot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, name, tier, price, html, pass })

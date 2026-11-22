@@ -3,10 +3,6 @@ export default async function handler(req, res) {
   const { code, codeVerifier } = req.body;
   if (!code || !codeVerifier) return res.status(400).json({ error: 'Missing code or codeVerifier' });
 
-  // Log environment variables (remove after debugging)
-  console.log('DERIV_CLIENT_ID exists?', !!process.env.DERIV_CLIENT_ID);
-  console.log('DERIV_REDIRECT_URI exists?', !!process.env.DERIV_REDIRECT_URI);
-
   try {
     const tokenResponse = await fetch('https://auth.deriv.com/oauth2/token', {
       method: 'POST',
@@ -21,7 +17,6 @@ export default async function handler(req, res) {
     });
 
     const data = await tokenResponse.json();
-    console.log('Token exchange status:', tokenResponse.status, data);
 
     if (!tokenResponse.ok) {
       return res.status(tokenResponse.status).json({ error: data.error_description || 'Token exchange failed' });
