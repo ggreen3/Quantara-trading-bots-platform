@@ -25,7 +25,15 @@ export default async function handler(req, res) {
     const doc = await getDb().collection('bots').doc(id).get();
     if (!doc.exists) return res.status(404).json({ error: 'Bot not found' });
 
-    let html = doc.data().htmlContent || '';
+    const data = doc.data();
+    let html;
+    if (data.engine === 'math' || data.engine === 'super') {
+      html = '<!doctype html><html><head><title>' + String(data.name || id).replace(/</g, '&lt;') + '</title></head><body>' +
+        '<script>window.__QUANTARA_BOT_ID__=' + JSON.stringify(data.engine === 'super' ? 'super' : id) + ';</script>' +
+        '<script src="/math-engine.js"></script><script src="/math-ui.js"></script></body></html>';
+    } else {
+      html = data.htmlContent || '';
+    }
     const config = {
       token: accessToken,
       accountId: req.headers['x-deriv-account-id'] || '',

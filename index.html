@@ -226,11 +226,16 @@
             grid.innerHTML = '<p>No bots available. Check back soon.</p>';
             return;
         }
-        grid.innerHTML = bots.map(bot => `
+        const superCard = `<a href="/bot.html?id=super-bot" class="bot-card" style="border-color:#6ee7b7;box-shadow:0 0 22px #6ee7b733">
+            <h3>Super Bot - All Strategies</h3>
+            <p>Free - runs every math bot at once</p>
+            <span class="badge">One connection, all bots</span>
+        </a>`;
+        grid.innerHTML = superCard + bots.map(bot => `
             <a href="/bot.html?id=${bot.id}" class="bot-card">
                 <h3>${escapeHtml(bot.name)}</h3>
                 <p>${bot.tier === 'free' ? 'Free' : 'Premium - KES ' + (bot.price || 0)}</p>
-                <span class="badge">Lease 2 weeks</span>
+                <span class="badge">${bot.engine === 'legacy' ? 'Legacy' : 'Math strategy'}</span>
             </a>
         `).join('');
     }

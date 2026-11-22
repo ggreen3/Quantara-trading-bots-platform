@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     const bots = [];
     snapshot.forEach(doc => {
       const data = doc.data();
-      bots.push({ id: doc.id, name: data.name, tier: data.tier, price: data.price || 0 });
+      bots.push({ id: doc.id, name: data.name, tier: data.tier, price: data.price || 0, engine: data.engine || 'legacy' });
     });
     return res.status(200).json(bots);
   } catch (err) {
