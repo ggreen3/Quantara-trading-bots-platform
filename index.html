@@ -226,7 +226,7 @@
             grid.innerHTML = '<p>No bots available. Check back soon.</p>';
             return;
         }
-        const superCard = `<a href="/bot.html?id=super-bot" class="bot-card" style="border-color:#6ee7b7;box-shadow:0 0 22px #6ee7b733">
+        const superCard = bots.some(b => b.id === 'super-bot') ? '' : `<a href="/bot.html?id=super-bot" class="bot-card" style="border-color:#6ee7b7;box-shadow:0 0 22px #6ee7b733">
             <h3>Super Bot - All Strategies</h3>
             <p>Free - runs every math bot at once</p>
             <span class="badge">One connection, all bots</span>
