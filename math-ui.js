@@ -47,14 +47,17 @@
     '<p class="sub">Pure math strategies - no AI calls. Account: ' + (cfg.accountId || '-') + ' (' + (isDemo ? 'demo' : 'real') + ')</p>' +
     '<div class="panel">' +
     '<div class="grid">' +
-    '<div><label>Stake (USD)</label><input id="stake" type="number" min="0.35" step="0.35" value="1"></div>' +
+    '<div><label>Min stake (% of balance)</label><input id="minStakePct" type="number" min="0.1" step="0.1" value="0.5"></div>' +
+    '<div><label>Max stake (% of balance)</label><input id="maxStakePct" type="number" min="0.1" step="0.1" value="2"></div>' +
     '<div><label>Duration (s)</label><input id="duration" type="number" min="15" value="' + (all ? 60 : chosen[0].duration) + '"></div>' +
     '<div><label>Cooldown (s)</label><input id="cooldown" type="number" min="1" value="' + (all ? 30 : 15) + '"></div>' +
-    '<div><label>Max trades</label><input id="maxTrades" type="number" min="1" value="20"></div>' +
-    '<div><label>Loss limit (USD)</label><input id="lossLimit" type="number" min="1" value="50"></div>' +
+    '<div><label>Take profit (x balance)</label><input id="tpMultiple" type="number" min="1.01" step="0.01" value="1.10"></div>' +
+    '<div><label>Stop loss (x balance)</label><input id="slMultiple" type="number" min="0.01" max="0.99" step="0.01" value="0.90"></div>' +
     '</div>' +
+    '<p class="sub">Stake trails your balance: each trade uses min% x signal strength, capped at max%. Runs indefinitely until TP or SL is hit, then all open trades are closed.</p>' +
     (isDemo ? '' : '<p class="warn">Real account: trading stays locked until you arm it. <label style="display:inline"><input id="realArmed" type="checkbox" style="width:auto"> Arm real trading</label></p>') +
     '<p><button id="start">Start</button><button id="stop" class="stop" disabled>Stop</button><span id="status">Connecting...</span></p>' +
+    '<div class="stats"><span>Balance <b id="sBalance">-</b></span><span>Starting <b id="sStart">-</b></span><span>TP at <b id="sTp">-</b></span><span>SL at <b id="sSl">-</b></span></div>' +
     '<div class="stats"><span>Trades <b id="sTrades">0</b></span><span>P/L <b id="sPnl">0.00</b></span><span>Wins <b id="sWon">0</b></span><span>Losses <b id="sLost">0</b></span></div>' +
     '</div>' +
     '<div class="panel"><table><thead><tr><th>On</th><th>Strategy</th><th>Market</th><th>Signal</th><th>Reason</th><th>Trades</th><th>P/L</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
@@ -66,11 +69,12 @@
 
   function opts() {
     return {
-      stake: Number($('stake').value) || 1,
+      minStakePct: Number($('minStakePct').value) || 0.5,
+      maxStakePct: Number($('maxStakePct').value) || 2,
       duration: Number($('duration').value) || 60,
       cooldown: (Number($('cooldown').value) || 5) * 1000,
-      maxTrades: Number($('maxTrades').value) || 20,
-      lossLimit: Number($('lossLimit').value) || 50,
+      tpMultiple: Number($('tpMultiple').value) || 1.1,
+      slMultiple: Number($('slMultiple').value) || 0.9,
       realArmed: !$('realArmed') || $('realArmed').checked
     };
   }
@@ -78,6 +82,10 @@
   engine.onStatus = function (text, ok) {
     $('status').textContent = text;
     $('status').className = ok ? 'ok' : 'bad';
+    if (engine.targetHit) {
+      $('start').disabled = false;
+      $('stop').disabled = true;
+    }
   };
   engine.onLog = function (e) {
     var el = $('log');
@@ -85,10 +93,10 @@
     el.scrollTop = el.scrollHeight;
   };
   engine.onUpdate = function (s) {
-    if (s.balance !== undefined) {
-      engine.onLog({ msg: 'Balance ' + s.currency + ' ' + s.balance, kind: '', time: new Date().toLocaleTimeString() });
-      return;
-    }
+    $('sBalance').textContent = s.balance ? Number(s.balance).toFixed(2) : '-';
+    $('sStart').textContent = s.startBalance ? Number(s.startBalance).toFixed(2) : '-';
+    $('sTp').textContent = s.tpTarget ? Number(s.tpTarget).toFixed(2) : '-';
+    $('sSl').textContent = s.slTarget ? Number(s.slTarget).toFixed(2) : '-';
     var sess = s.session || {};
     $('sTrades').textContent = sess.trades || 0;
     $('sPnl').textContent = (sess.pnl || 0).toFixed(2);
@@ -111,6 +119,7 @@
   });
 
   $('start').onclick = function () {
+    if (engine.targetHit) engine.resetSession();
     engine.opts = opts();
     engine.start();
     $('start').disabled = true;

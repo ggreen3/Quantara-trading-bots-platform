@@ -232,6 +232,10 @@
     this.busy = false;
     this.lastProposalAt = 0;
     this.backoffUntil = 0;
+    this.currentBalance = Number(cfg.balance) || 0;
+    this.startBalance = 0;
+    this.targetHit = false;
+    this.targetType = '';
     this.onStatus = function () {};
     this.onLog = function () {};
     this.onUpdate = function () {};
@@ -322,7 +326,13 @@
       this.evaluate(sym);
     }
     if (msg.msg_type === 'balance' && msg.balance) {
-      this.onUpdate({ balance: msg.balance.balance, currency: msg.balance.currency });
+      this.currentBalance = Number(msg.balance.balance) || 0;
+      if (!this.startBalance && this.currentBalance > 0) {
+        this.startBalance = this.currentBalance;
+        this.log('Starting balance ' + this.currentBalance.toFixed(2), 'ok');
+      }
+      this.checkTarget();
+      this.onUpdate(this.snapshot());
     }
     if (msg.msg_type === 'proposal_open_contract' && msg.proposal_open_contract) {
       var c = msg.proposal_open_contract;
@@ -343,6 +353,44 @@
     }
   };
 
+  MathEngine.prototype.checkTarget = function () {
+    if (this.targetHit || !this.startBalance || !this.currentBalance) return;
+    var tp = Number(this.opts.tpMultiple) || 0;
+    var sl = Number(this.opts.slMultiple) || 0;
+    if (tp > 0 && this.currentBalance >= this.startBalance * tp) {
+      this.hitTarget('Take profit', tp);
+    } else if (sl > 0 && this.currentBalance <= this.startBalance * sl) {
+      this.hitTarget('Stop loss', sl);
+    }
+  };
+
+  MathEngine.prototype.hitTarget = function (label, multiple) {
+    this.targetHit = true;
+    this.targetType = label;
+    this.running = false;
+    this.onStatus(label + ' ' + multiple + 'x', label === 'Take profit');
+    this.log(label + ' reached at ' + multiple + 'x starting balance - closing all trades', label === 'Take profit' ? 'ok' : 'bad');
+    var self = this;
+    Object.keys(this.pendingContracts).forEach(function (id) {
+      self.send({ sell: Number(id), price: 0 }).then(function () {
+        self.log('Closed contract #' + id, 'ok');
+      }).catch(function (e) {
+        self.log('Could not close #' + id + ': ' + e.message, 'bad');
+      });
+    });
+    this.pendingContracts = {};
+    this.onUpdate(this.snapshot());
+  };
+
+  MathEngine.prototype.resetSession = function () {
+    this.targetHit = false;
+    this.targetType = '';
+    this.startBalance = 0;
+    this.session = { trades: 0, pnl: 0, won: 0, lost: 0 };
+    this.state = {};
+    this.log('New session armed; waiting for balance', 'ok');
+  };
+
   MathEngine.prototype.snapshot = function () {
     var self = this;
     var rows = this.strategies.map(function (s) {
@@ -353,7 +401,13 @@
         losses: st.losses || 0
       };
     });
-    return { rows: rows, session: this.session, connected: this.connected, running: this.running };
+    return {
+      rows: rows, session: this.session, connected: this.connected, running: this.running,
+      balance: this.currentBalance, startBalance: this.startBalance,
+      targetHit: this.targetHit, targetType: this.targetType,
+      tpTarget: this.startBalance * (Number(this.opts.tpMultiple) || 0),
+      slTarget: this.startBalance * (Number(this.opts.slMultiple) || 0)
+    };
   };
 
   MathEngine.prototype.evaluate = function (symbol) {
@@ -361,10 +415,9 @@
     var self = this;
     var isDemo = /^(D|V|DOM)/i.test(this.cfg.accountId || '');
     if (!isDemo && !this.opts.realArmed) return;
+    if (this.targetHit) return;
     if (Date.now() < this.backoffUntil) return;
     if (this.busy) return;
-    if (this.session.trades >= (this.opts.maxTrades || 20)) return;
-    if (this.session.pnl <= -(this.opts.lossLimit || 50)) return;
 
     this.strategies.forEach(function (s) {
       if (s.symbol !== symbol) return;
@@ -391,9 +444,18 @@
     this.busy = true;
     this.lastProposalAt = now;
 
-    var stake = (this.opts.stake || 1) * (signal.mult || 1);
+    var minPct = Number(this.opts.minStakePct) || 1;
+    var maxPct = Number(this.opts.maxStakePct) || 5;
+    if (maxPct < minPct) maxPct = minPct;
+    var pct = Math.min(maxPct, minPct * (signal.mult || 1));
+    var stake = Math.max(0.35, Math.round((this.currentBalance * pct / 100) * 100) / 100);
+    if (!isFinite(stake) || this.currentBalance <= 0) {
+      this.log('No balance available for stake sizing', 'bad');
+      this.busy = false;
+      return;
+    }
     var duration = this.opts.duration || strategy.duration || 60;
-    this.log(strategy.name + ': ' + signal.action + ' - ' + signal.reason + ' @ ' + stake.toFixed(2));
+    this.log(strategy.name + ': ' + signal.action + ' - ' + signal.reason + ' @ ' + stake.toFixed(2) + ' (' + pct.toFixed(2) + '% of balance)');
     this.send({
       proposal: 1, amount: stake, basis: 'stake', contract_type: signal.action,
       currency: 'USD', duration: duration, duration_unit: 's',
